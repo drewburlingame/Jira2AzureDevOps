@@ -65,6 +65,12 @@
   * __summarize__
     * __issue-types__ prints a list of issue types grouped by project
     * __status__ prints all statuses grouped by project, issue type and then category
+	
+## List of WorkItem fields
+
+https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.1
+
+summarized at [workItemFieldList.json](workItemFieldList.json)
 
 
 ## Caveates

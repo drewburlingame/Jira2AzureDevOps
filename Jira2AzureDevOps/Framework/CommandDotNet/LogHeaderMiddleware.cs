@@ -95,7 +95,7 @@ namespace Jira2AzureDevOps.Framework.CommandDotNet
             var entries = GetOtherConfigInfo(commandContext, config).ToList();
 
             sb.AppendLine("***************************************");
-            sb.AppendLine($" Begin: {targetCommand.Name}");
+            sb.AppendLine($" Command: {targetCommand.GetParentCommands(true).Reverse().Skip(1).Select(c => c.Name).ToCsv(" ")}");
             sb.LogArguments("Arguments", targetCommand.Operands, config, parseResult);
             sb.LogArguments("Options", targetCommand.Options.Where(o => !o.IsSystemOption), config, parseResult);
 

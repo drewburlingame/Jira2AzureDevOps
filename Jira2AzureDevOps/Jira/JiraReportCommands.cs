@@ -52,6 +52,8 @@ namespace Jira2AzureDevOps.Jira
             bool printCategory = false,
             [Option(ShortName = "s", LongName = "print-status")]
             bool printStatus = false,
+            [Option(ShortName = "i", LongName = "print-issue-count")]
+            bool printIssueCount = false,
             [Option(ShortName = "x", LongName = "exportedOnly", Description = "When specified, only statuses existing for exported items will be printed")]
             bool exportedOnly = false)
         {
@@ -72,8 +74,13 @@ namespace Jira2AzureDevOps.Jira
             }
             if (printHeaders)
             {
-                Console.Out.Write(Row("Jira Project", "Jira Issue Type", "Jira Category", "Jira Status"));
-                Console.Out.WriteLine(",Azure DevOps Status");
+                Console.Out.Write(Row(
+                    MappingConstants.FileHeaders.Project, 
+                    MappingConstants.FileHeaders.IssueType, 
+                    MappingConstants.FileHeaders.StatusCategory, 
+                    MappingConstants.FileHeaders.Status));
+                Console.Out.Write(printIssueCount ? $",{MappingConstants.FileHeaders.IssueCount}," : ",");
+                Console.Out.WriteLine(MappingConstants.FileHeaders.WorkItemStatus);
             }
 
             var statuses = exportedOnly
@@ -82,11 +89,12 @@ namespace Jira2AzureDevOps.Jira
 
             var rows = statuses
                 .Select(s => Row(s.project, s.issueType, s.category, s.status))
-                .Distinct()
-                .OrderBy(r => r);
+                .ToLookup(r => r)
+                .OrderBy(r => r.Key);
             foreach (var row in rows)
             {
-                Console.Out.WriteLine(row);
+                Console.Out.Write(row.Key);
+                Console.Out.WriteLine(printIssueCount ? $",{row.Count()}," : null);
             }
         }
 
@@ -102,6 +110,8 @@ namespace Jira2AzureDevOps.Jira
             bool printIssueType = false,
             [Option(ShortName = "d", LongName = "print-description")]
             bool printDescription = false,
+            [Option(ShortName = "i", LongName = "print-issue-count")]
+            bool printIssueCount = false,
             [Option(ShortName = "x", LongName = "exportedOnly", Description = "When specified, only issue types existing for exported items will be printed")]
             bool exportedOnly = false)
         {
@@ -121,8 +131,9 @@ namespace Jira2AzureDevOps.Jira
             }
             if (printHeaders)
             {
-                Console.Out.Write(Row("Jira Project", "Jira Issue Type", "Jira Issue Type Description"));
-                Console.Out.WriteLine(",Azure DevOps Work Item Type");
+                Console.Out.Write(Row(MappingConstants.FileHeaders.Project, MappingConstants.FileHeaders.IssueType, MappingConstants.FileHeaders.IssueTypeDescription));
+                Console.Out.Write(printIssueCount ? $",{MappingConstants.FileHeaders.IssueCount}," : ",");
+                Console.Out.WriteLine(MappingConstants.FileHeaders.WorkItemType);
             }
             
             var issueTypes = exportedOnly
@@ -131,11 +142,12 @@ namespace Jira2AzureDevOps.Jira
 
             var rows = issueTypes
                 .Select(s => Row(s.project, s.issueType, s.description))
-                .Distinct()
-                .OrderBy(r => r);
+                .ToLookup(r => r)
+                .OrderBy(r => r.Key);
             foreach (var row in rows)
             {
-                Console.Out.WriteLine(row);
+                Console.Out.Write(row.Key);
+                Console.Out.WriteLine(printIssueCount ? $",{row.Count()}," : null);
             }
         }
 
@@ -195,6 +207,5 @@ namespace Jira2AzureDevOps.Jira
                 .Where(m => projectFilter.IncludesProject(m.IssueId.Project))
                 .Select(m => (m.IssueId.Project, m.IssueType, m.StatusCategory, m.Status));
         }
-
     }
 }

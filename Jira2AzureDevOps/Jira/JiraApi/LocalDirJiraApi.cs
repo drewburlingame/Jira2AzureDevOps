@@ -70,7 +70,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetAttachmentMetadataFile(attachmentId);
             Logger.Trace("Save attachment-metadata to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, metadata.ToString());
+            file.WriteAllText(metadata.ToString());
         }
 
         public Task<FileInfo> GetAttachment(Attachment attachment)
@@ -97,7 +97,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetIssueFieldsFile();
             Logger.Trace("Save issue fields to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, issueFields.ToString());
+            file.WriteAllText(issueFields.ToString());
         }
 
         public Task<JObject> GetIssueLinkTypes()
@@ -111,7 +111,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetIssueLinkTypesFile();
             Logger.Trace("Save issue link types to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, linkTypes.ToString());
+            file.WriteAllText(linkTypes.ToString());
         }
 
         public Task<JArray> GetIssuePriorities()
@@ -125,7 +125,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetIssuePrioritiesFile();
             Logger.Trace("Save issue priorities to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, priorities.ToString());
+            file.WriteAllText(priorities.ToString());
         }
 
         public Task<JArray> GetIssueResolutions()
@@ -139,7 +139,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetIssueResolutionsFile();
             Logger.Trace("Save issue resolutions to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, resolutions.ToString());
+            file.WriteAllText(resolutions.ToString());
         }
 
         public Task<JArray> GetIssueTypes()
@@ -153,7 +153,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetIssueTypesFile();
             Logger.Trace("Save issue types to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, issueTypes.ToString());
+            file.WriteAllText(issueTypes.ToString());
         }
 
         public Task<string[]> GetLabels()
@@ -167,7 +167,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetLabelsFile();
             Logger.Trace("Save labels to file: {file}", file.FullName);
-            File.WriteAllLines(file.FullName, labels);
+            file.WriteAllLines(labels);
         }
 
         public Task<JArray> GetStatusesByProject()
@@ -181,7 +181,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetStatusesFile();
             Logger.Trace("Save statuses to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, statuses.ToString());
+            file.WriteAllText(statuses.ToString());
         }
 
         public Task<JArray> GetProjects()
@@ -195,16 +195,16 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         {
             var file = _localDirs.GetProjectsFile();
             Logger.Trace("Save projects to file: {file}", file.FullName);
-            File.WriteAllText(file.FullName, projects.ToString());
+            file.WriteAllText(projects.ToString());
         }
 
         private static async Task<T> LoadJsonFromFile<T>(FileInfo file) where T : JToken
         {
-            var json = await LoadTextFromFile(file);
+            var json = LoadTextFromFile(file);
             return json == null ? null : (T)JToken.Parse(json);
         }
 
-        private static async Task<string> LoadTextFromFile(FileInfo file)
+        private static string LoadTextFromFile(FileInfo file)
         {
             if (!file.Exists)
             {
@@ -212,7 +212,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
                 return null;
             }
 
-            return File.ReadAllText(file.FullName);
+            return file.ReadAllText();
         }
 
         private static async Task<string[]> LoadLinesFromFile(FileInfo file)
@@ -223,7 +223,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
                 return null;
             }
 
-            return File.ReadAllLines(file.FullName);
+            return file.ReadAllLines();
         }
 
         private static ConcurrentDictionary<string, HashSet<IssueId>> LoadedIssuesByProject(LocalDirs localDirs)
@@ -233,7 +233,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
                 .ToLookup(id => id.Project)
                 .ToDictionary(group => @group.Key, group => @group.ToHashSet());
 
-            Logger.Info("Loaded {issueCount} cached issues", issuesByProject.Sum(kvp => kvp.Value.Count));
+            Logger.Debug("Loaded {issueCount} cached issues", issuesByProject.Sum(kvp => kvp.Value.Count));
 
             return new ConcurrentDictionary<string, HashSet<IssueId>>(issuesByProject);
         }

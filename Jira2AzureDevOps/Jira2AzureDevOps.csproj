@@ -289,8 +289,13 @@
     <Compile Include="App.cs" />
     <Compile Include="AttachmentMigration.cs" />
     <Compile Include="AzureDevOps\AdoApiSettings.cs" />
+    <Compile Include="AzureDevOps\AdoContext.cs" />
     <Compile Include="AzureDevOps\AzureDevOpsApp.cs" />
-    <Compile Include="AzureDevOps\RestAdoApi.cs" />
+    <Compile Include="AzureDevOps\CsvMapperBase.cs" />
+    <Compile Include="AzureDevOps\IssueTypeCsvMapper.cs" />
+    <Compile Include="AzureDevOps\WorkItemImporter.cs" />
+    <Compile Include="AzureDevOps\AdoApi.cs" />
+    <Compile Include="AzureDevOps\StatusCsvMapper.cs" />
     <Compile Include="Cancellation.cs" />
     <Compile Include="Framework\CommandDotNet\DisableConsoleLoggingMiddleware.cs" />
     <Compile Include="Framework\CommandDotNet\SelfValidatingArgumentsMiddleware.cs" />
@@ -302,6 +307,7 @@
     <Compile Include="Framework\CommandDotNet\DisableConsoleLoggingAttribute.cs" />
     <Compile Include="Framework\EnumerableExtensions.cs" />
     <Compile Include="Framework\ETACalculator.cs" />
+    <Compile Include="Framework\FileInfoExtensions.cs" />
     <Compile Include="Framework\Json\IssueIdConverter.cs" />
     <Compile Include="Framework\Json\ParseStringConverter.cs" />
     <Compile Include="Framework\NLog\DemystifyExceptionLayoutRenderer.cs" />
@@ -341,6 +347,7 @@
     <Compile Include="Jira\Model\StatusesByType.cs" />
     <Compile Include="LocalDirs.cs" />
     <Compile Include="IssueMigration.cs" />
+    <Compile Include="MappingConstants.cs" />
     <Compile Include="MigrationRepository.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

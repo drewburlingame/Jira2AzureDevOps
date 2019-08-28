@@ -17,7 +17,8 @@ namespace Jira2AzureDevOps.AzureDevOps
         [Option(Description = "The project to import into")]
         public string AdoProject { get; set; }
 
-        [Option(Description = "Code of the field used to store original Id")]
+        //https://docs.microsoft.com/en-us/azure/devops/boards/work-items/work-item-fields?view=azure-devops
+        [Option(Description = "Code of the field used to store original Id. {ProcessName}.{FieldName}")]
         public string JiraIdField { get; set; } = "JiraId";
 
         public IEnumerable<string> GetValidationErrors()

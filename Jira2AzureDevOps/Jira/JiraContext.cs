@@ -1,4 +1,5 @@
-﻿using Jira2AzureDevOps.Jira.JiraApi;
+﻿using Jira2AzureDevOps.AzureDevOps;
+using Jira2AzureDevOps.Jira.JiraApi;
 using NLog;
 
 namespace Jira2AzureDevOps.Jira

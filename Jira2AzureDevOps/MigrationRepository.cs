@@ -26,7 +26,7 @@ namespace Jira2AzureDevOps
             return Get(issueId) ?? new IssueMigration{IssueId = issueId};
         }
 
-        private IssueMigration Get(IssueId issueId)
+        public IssueMigration Get(IssueId issueId)
         {
             var file = _localDirs.GetIssueMigrationStatusFile(issueId);
             if (!file.Exists)
