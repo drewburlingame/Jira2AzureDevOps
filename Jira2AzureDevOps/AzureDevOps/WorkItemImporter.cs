@@ -1,9 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using Jira2AzureDevOps.Jira;
 using Jira2AzureDevOps.Jira.JiraApi;
 using Jira2AzureDevOps.Jira.Model;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.Internals;
 using NLog;
+using WiAttachment = Microsoft.TeamFoundation.WorkItemTracking.Client.Attachment;
 
 namespace Jira2AzureDevOps.AzureDevOps
 {
@@ -57,8 +61,7 @@ namespace Jira2AzureDevOps.AzureDevOps
 
             if (!TryGetWorkItemType(workItemTypeKey, out var workItemType))
             {
-                Logger.Error("Unable to find work item type {WorkItemDestinationType} in {Project}", workItemTypeKey, _adoApi.TfsProject.Name);
-                return false;
+                throw new Exception($"Unable to find work item type {workItemTypeKey} in {_adoApi.TfsProject.Name}");
             }
             
             var existingWorkItem = _adoApi.GetWorkItem(migration);
@@ -72,18 +75,20 @@ namespace Jira2AzureDevOps.AzureDevOps
                 else
                 {
                     // TODO: resume migration from last stopping point
-                    Logger.Error("Skipping issue {issue} for existing {issueType}.  TODO: resume migration", migration.IssueId, migration.IssueType);
-                    return false;
+                    throw new Exception($"Skipping issue {migration.IssueId} for existing {migration.IssueType}.  TODO: resume migration");
                 }
             }
 
             WorkItem workItem = workItemType.NewWorkItem();
-            Logger.Debug("created Work Item for type {workItemType} for jira id {jiraId}", workItem.Type.Name, migration.IssueId);
+            migration.TempWorkItemId = workItem.TemporaryId;
+            _migrationRepository.Save(migration);
+            var wiLog = new {Type=workItem.Type.Name, migration.IssueId, TempId=migration.TempWorkItemId};
+            Logger.Debug("created Work Item for {wi}", wiLog);
 
             var issue = _jiraApi.GetIssue(migration.IssueId).Result.ToObject<Issue>();
 
             MapWorkItem(migration, issue, workItem);
-            Logger.Debug("mapped Work Item for type {workItemType} for jira id {jiraId}", workItem.Type.Name, migration.IssueId);
+            Logger.Debug("mapped Work Item for {wi}", wiLog);
 
             workItem.Save();
             migration.WorkItemId = workItem.Id;
@@ -91,7 +96,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             _migrationRepository.Save(migration);
             Logger.Info("Imported issue {issue} as work item {workItem}",
                 new {migration.IssueId, migration.IssueType, migration.Status},
-                new {workItem.Id, workItem.Type.Name, workItem.State});
+                new {workItem.Id, workItem.Type.Name, workItem.State, TempId = migration.TempWorkItemId});
 
             return true;
         }
@@ -101,6 +106,8 @@ namespace Jira2AzureDevOps.AzureDevOps
         {
             workItem[_adoContext.ApiSettings.JiraIdField] = issue.Key;
 
+
+
             workItem.Fields["System.CreatedDate"].Value = DateTime.Now.AddDays(-1);
             workItem.Fields["System.ChangedDate"].Value = DateTime.Now.AddDays(-1);
 
@@ -108,6 +115,15 @@ namespace Jira2AzureDevOps.AzureDevOps
             workItem.Description = issue.Fields.Description;
 
             workItem.State = _statusMapper.GetMappedValueOrThrow(migration);
+
+            foreach (var attachmentMigration in migration.Attachments)
+            {
+                var fullPath = _jiraContext.LocalDirs.GetFullPath(attachmentMigration.File);
+                workItem.Attachments.Add(new WiAttachment(fullPath));
+                Logger.Debug("Added attachment to {issueId} {file}", issue.Key, fullPath);
+                attachmentMigration.Imported = true;
+                //_migrationRepository.Save(migration);
+            }
 
             // TODO: map other fields
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.TeamFoundation.Client;
 using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.WebApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,6 +96,8 @@ namespace Jira2AzureDevOps.AzureDevOps
 
         private void Delete((string jiraId, int wiId)[] ids)
         {
+            if (Cancellation.IsRequested) return;
+
             Logger.Debug("Deleting work items {ids}", ids);
             _workItemStore.DestroyWorkItems(ids.Select(i => i.wiId));
         }

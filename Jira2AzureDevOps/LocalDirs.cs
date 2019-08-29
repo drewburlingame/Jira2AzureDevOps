@@ -20,7 +20,7 @@ namespace Jira2AzureDevOps
 
         public LocalDirs(string rootDir)
         {
-            if (rootDir == null)
+            if (rootDir.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException(nameof(rootDir));
             }
@@ -37,15 +37,14 @@ namespace Jira2AzureDevOps
             Meta.FullName.EnsureDirectoryExists();
         }
 
-        public string GetRelativePath(FileInfo fileInfo)
-        {
-            return fileInfo.FullName.Replace(Root.FullName, null);
-        }
-        
-        public FileInfo GetFileFromRelativePath(string relativePath)
-        {
-            return new FileInfo(Path.Combine(Root.FullName, relativePath));
-        }
+        public string GetFullPath(string relativePath) =>
+            Path.Combine(Root.FullName, relativePath.StartsWith(@"\") ? relativePath.Substring(1) : relativePath);
+
+        public string GetRelativePath(FileInfo fileInfo) => 
+            fileInfo.FullName.Replace(Root.FullName, null);
+
+        public FileInfo GetFileFromRelativePath(string relativePath) => 
+            new FileInfo(GetFullPath(relativePath));
 
         public DirectoryInfo GetIssueDir(IssueId issueId) =>
             new DirectoryInfo(Path.Combine(Issues.FullName, issueId.ToString()))

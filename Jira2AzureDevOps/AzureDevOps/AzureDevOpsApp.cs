@@ -4,6 +4,7 @@ using Jira2AzureDevOps.Jira;
 using Jira2AzureDevOps.Jira.JiraApi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,7 +60,6 @@ namespace Jira2AzureDevOps.AzureDevOps
                     Logger.Error(e, "Failed to reset {issueId}", issueId);
                 }
             }
-
         }
 
         [Command(Description = "Imports the given issue(s) to Azure DevOps")]
@@ -124,14 +124,29 @@ namespace Jira2AzureDevOps.AzureDevOps
 
             var importer = new WorkItemImporter(force, _migrationRepository, _adoContext, _jiraContext, statusMapper, issueTypeCsvMapper);
 
+            var stopwatch = Stopwatch.StartNew();
             int imported = 0;
-            foreach (var migration in issueMigrations.Where(m => force || !m.ImportComplete))
+            int errored = 0;
+
+            foreach (var migration in issueMigrations
+                .Where(m => force || !m.ImportComplete)
+                .TakeWhile(m => Cancellation.IsNotRequested))
             {
-                if (importer.TryImport(migration))
+                try
                 {
-                    imported++;
+                    if (importer.TryImport(migration))
+                    {
+                        imported++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errored++;
+                    Logger.Error(e, "Failed to import {issueId}", migration.IssueId);
                 }
             }
+
+            Logger.Info(new {imported, errored, runTime=stopwatch.Elapsed});
         }
     }
 }

@@ -27,6 +27,7 @@ namespace Jira2AzureDevOps
 
         public void Reset(IssueMigration migration)
         {
+            migration.TempWorkItemId = default;
             migration.WorkItemId = default;
             migration.IssueImported = false;
             migration.Attachments.ForEach(a => a.Imported = false);
