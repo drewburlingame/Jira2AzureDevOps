@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Jira2AzureDevOps.Jira.ArgumentModels;
 using NLog;
 
 namespace Jira2AzureDevOps.AzureDevOps
@@ -62,6 +63,17 @@ namespace Jira2AzureDevOps.AzureDevOps
             }
         }
 
+        [Command(Description = "Imports the issues for the given Jira project(s) to Azure DevOps")]
+        public void ImportAll(ProjectFilter projectFilter,
+            [Option(ShortName = "f", LongName = "force", Description = "if the item has already been imported, it will be deleted and reimported.")]
+            bool force,
+            FileInfo issueTypeMappingFile,
+            FileInfo statusMappingFile)
+        {
+            var allMigrations = _migrationRepository.GetAll(out var count);
+            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, count, allMigrations);
+        }
+
         [Command(Description = "Imports the given issue(s) to Azure DevOps")]
         public void ImportById(
             [Option(ShortName = "f", LongName = "force", Description = "if the item has already been imported, it will be deleted and reimported.")] 
@@ -70,14 +82,6 @@ namespace Jira2AzureDevOps.AzureDevOps
             FileInfo statusMappingFile,
             List<IssueId> issueIds)
         {
-            if (!issueTypeMappingFile.Exists)
-            {
-                Console.Out.WriteLine("issue type mapping file not found:" + issueTypeMappingFile.FullName);
-            }
-            if (!statusMappingFile.Exists)
-            {
-                Console.Out.WriteLine("status mapping file not found:" + statusMappingFile.FullName);
-            }
             if (issueIds.IsNullOrEmpty())
             {
                 Console.Out.WriteLine("no issue ids provided");
@@ -91,30 +95,51 @@ namespace Jira2AzureDevOps.AzureDevOps
 
                 Console.Out.WriteLine($"Migrations were not found for {missingIssueIds}");
                 Console.Out.WriteLine("continue without them: y");
-                var intput = Console.In.ReadLine();
-                if (!"y".Equals(intput, StringComparison.OrdinalIgnoreCase))
+                var input = Console.In.ReadLine();
+                if (!"y".Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
             }
 
             var pendingMigrations = issueMigrations.Where(m => !m.ImportComplete).ToList();
-            if(!force && pendingMigrations.Count < issueMigrations.Count)
+            if (!force && pendingMigrations.Count < issueMigrations.Count)
             {
                 var migratedIssueIds = issueMigrations.Where(m => m.ImportComplete).ToOrderedCsv();
 
                 Console.Out.WriteLine($"Migrations already imported {migratedIssueIds}");
                 Console.Out.WriteLine("continue without them   : y");
                 Console.Out.WriteLine("delete and reimport them: f");
-                var intput = Console.In.ReadLine();
-                if (!"f".Equals(intput, StringComparison.OrdinalIgnoreCase))
+                var input = Console.In.ReadLine();
+                if (!"f".Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     force = true;
                 }
-                else if (!"y".Equals(intput, StringComparison.OrdinalIgnoreCase))
+                else if (!"y".Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
+            }
+
+            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, issueMigrations.Count, issueMigrations);
+        }
+
+        private void ImportMigrations(
+            bool force, 
+            FileInfo issueTypeMappingFile, 
+            FileInfo statusMappingFile,
+            int totalCount,
+            IEnumerable<IssueMigration> issueMigrations)
+        {
+            if (!issueTypeMappingFile.Exists)
+            {
+                Console.Out.WriteLine("issue type mapping file not found:" + issueTypeMappingFile.FullName);
+                return;
+            }
+            if (!statusMappingFile.Exists)
+            {
+                Console.Out.WriteLine("status mapping file not found:" + statusMappingFile.FullName);
+                return;
             }
 
             var statusMapper = new StatusCsvMapper(statusMappingFile);
@@ -122,7 +147,9 @@ namespace Jira2AzureDevOps.AzureDevOps
             var issueTypeCsvMapper = new IssueTypeCsvMapper(issueTypeMappingFile);
             issueTypeCsvMapper.LoadMap();
 
-            var importer = new WorkItemImporter(force, _migrationRepository, _adoContext, _jiraContext, statusMapper, issueTypeCsvMapper);
+            var importer = new WorkItemImporter(force, _migrationRepository, 
+                _adoContext, _jiraContext, 
+                statusMapper, issueTypeCsvMapper);
 
             var stopwatch = Stopwatch.StartNew();
             int imported = 0;
@@ -144,9 +171,14 @@ namespace Jira2AzureDevOps.AzureDevOps
                     errored++;
                     Logger.Error(e, "Failed to import {issueId}", migration.IssueId);
                 }
+
+                if((imported + errored)%20 == 0)
+                {
+                    Logger.Info(new{total=totalCount, remaining=(totalCount-imported-errored), imported, errored});
+                }
             }
 
-            Logger.Info(new {imported, errored, runTime=stopwatch.Elapsed});
+            Logger.Info(new {imported, errored, runTime = stopwatch.Elapsed});
         }
     }
 }
