@@ -12,6 +12,7 @@ namespace Jira2AzureDevOps.AzureDevOps
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly bool _force;
+        private readonly MigrationRepository _migrationRepository;
         private readonly AdoContext _adoContext;
         private readonly JiraContext _jiraContext;
         private readonly StatusCsvMapper _statusMapper;
@@ -19,9 +20,11 @@ namespace Jira2AzureDevOps.AzureDevOps
         private readonly IJiraApi _jiraApi;
         private readonly AdoApi _adoApi;
 
-        public WorkItemImporter(bool force, AdoContext adoContext, JiraContext jiraContext, StatusCsvMapper statusMapper, IssueTypeCsvMapper issueTypeCsvMapper)
+        public WorkItemImporter(bool force, MigrationRepository migrationRepository, AdoContext adoContext,
+            JiraContext jiraContext, StatusCsvMapper statusMapper, IssueTypeCsvMapper issueTypeCsvMapper)
         {
             _force = force;
+            _migrationRepository = migrationRepository ?? throw new ArgumentNullException(nameof(migrationRepository));
             _adoContext = adoContext ?? throw new ArgumentNullException(nameof(adoContext));
             _jiraContext = jiraContext ?? throw new ArgumentNullException(nameof(jiraContext));
             _statusMapper = statusMapper ?? throw new ArgumentNullException(nameof(statusMapper));
@@ -33,10 +36,19 @@ namespace Jira2AzureDevOps.AzureDevOps
 
         public bool TryImport(IssueMigration migration)
         {
-            if(migration.ImportComplete && !_force)
+            if(migration.ImportComplete)
             {
-                Logger.Debug("Skipping already imported issue {issue}", migration.IssueId);
-                return false;
+                if (_force)
+                {
+                    migration.IssueImported = false;
+                    migration.Attachments.ForEach(a => a.Imported = false);
+                    _migrationRepository.Save(migration);
+                }
+                else
+                {
+                    Logger.Debug("Skipping already imported issue {issue}", migration.IssueId);
+                    return false;
+                }
             }
 
             if (!_issueTypeCsvMapper.TryGetMappedValue(migration, out var workItemTypeKey))
@@ -51,13 +63,13 @@ namespace Jira2AzureDevOps.AzureDevOps
                 return false;
             }
             
-            var existingWorkItem = _adoApi.GetWorkItem(migration.IssueId);
+            var existingWorkItem = _adoApi.GetWorkItem(migration);
             if (existingWorkItem != null)
             {
                 if (_force)
                 {
                     Logger.Info("deleteing pre-existing workitem with originalId {originalId}", migration.IssueId);
-                    _adoApi.Delete(existingWorkItem);
+                    _adoApi.Delete(migration);
                 }
                 else
                 {
@@ -74,6 +86,15 @@ namespace Jira2AzureDevOps.AzureDevOps
 
             MapWorkItem(migration, issue, workItem);
             Logger.Debug("mapped Work Item for type {workItemType} for jira id {jiraId}", workItem.Type.Name, migration.IssueId);
+
+            workItem.Save();
+            migration.WorkItemId = workItem.Id;
+            migration.IssueImported = true;
+            _migrationRepository.Save(migration);
+            Logger.Info("Imported issue {issue} as work item {workItem}",
+                new {migration.IssueId, migration.IssueType, migration.Status},
+                new {workItem.Id, workItem.Type.Name, workItem.State});
+
             return true;
         }
 
@@ -81,7 +102,14 @@ namespace Jira2AzureDevOps.AzureDevOps
             IssueMigration migration, Issue issue, WorkItem workItem)
         {
             workItem[_adoContext.ApiSettings.JiraIdField] = issue.Key;
-            var workItemStatus = _statusMapper.GetMappedValueOrThrow(migration);
+
+            workItem.Fields["System.CreatedDate"].Value = DateTime.Now.AddDays(-1);
+            workItem.Fields["System.ChangedDate"].Value = DateTime.Now.AddDays(-1);
+
+            workItem.Title = issue.Fields.Summary;
+            workItem.Description = issue.Fields.Description;
+
+            workItem.State = _statusMapper.GetMappedValueOrThrow(migration);
 
             // TODO: map other fields
 

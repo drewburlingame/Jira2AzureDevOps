@@ -16,6 +16,6 @@ namespace Jira2AzureDevOps
 
         public bool ImportComplete => IssueImported && (Attachments?.All(a => a.Imported) ?? true);
         public bool IssueImported { get; set; }
-        public string AzureDevOpsId { get; set; }
+        public int WorkItemId { get; set; }
     }
 }

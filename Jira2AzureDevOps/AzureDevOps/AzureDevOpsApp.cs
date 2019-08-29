@@ -96,7 +96,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             var issueTypeCsvMapper = new IssueTypeCsvMapper(issueTypeMappingFile);
             issueTypeCsvMapper.LoadMap();
 
-            var importer = new WorkItemImporter(force, _adoContext, _jiraContext, statusMapper, issueTypeCsvMapper);
+            var importer = new WorkItemImporter(force, _migrationRepository, _adoContext, _jiraContext, statusMapper, issueTypeCsvMapper);
 
             int imported = 0;
             foreach (var migration in issueMigrations.Where(m => force || !m.ImportComplete))

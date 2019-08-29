@@ -13,6 +13,8 @@ namespace Jira2AzureDevOps.Framework
             yield return instance;
         }
 
+        internal static ICollection<T> ToCollection<T>(this IEnumerable<T> items) => items as ICollection<T> ?? items.ToList();
+
         public static string ToCsv(this IEnumerable<string> items, string separator = ",") => string.Join(separator, items);
 
         public static string ToCsv<T>(this IEnumerable<T> items, string separator = ",") => items.Select(i => i?.ToString()).ToCsv(separator);

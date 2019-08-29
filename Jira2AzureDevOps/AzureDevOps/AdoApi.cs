@@ -2,7 +2,9 @@
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Jira2AzureDevOps.Framework;
 using Jira2AzureDevOps.Jira;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using NLog;
@@ -15,7 +17,6 @@ namespace Jira2AzureDevOps.AzureDevOps
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly AdoApiSettings _adoApiSettings;
-        private VssConnection _vssConnection;
         private TfsTeamProjectCollection _tfsCollection;
         private WorkItemStore _workItemStore;
         private bool _isConnected;
@@ -35,13 +36,13 @@ namespace Jira2AzureDevOps.AzureDevOps
                 return true;
             }
 
-            var creds = new VssBasicCredential("", _adoApiSettings.AdoToken);
             var accountUri = new Uri(_adoApiSettings.AdoUrl);
-            _vssConnection = new VssConnection(accountUri, creds);
+            _tfsCollection = new TfsTeamProjectCollection(
+                accountUri, 
+                new VssBasicCredential("", _adoApiSettings.AdoToken));
 
             Logger.Debug("Try connect to TFS {url}", accountUri);
 
-            _tfsCollection = new TfsTeamProjectCollection(accountUri, creds);
             _tfsCollection.Authenticate();
 
             //we need to bypass rules if we want to load data in the past.
@@ -53,28 +54,51 @@ namespace Jira2AzureDevOps.AzureDevOps
             return _isConnected = true;
         }
 
-        internal WorkItem CreateWorkItem(string type)
+        public WorkItem GetWorkItem(IssueMigration issueMigration)
         {
-            return TfsProject.WorkItemTypes[type].NewWorkItem();
-        }
-
-        public WorkItem GetWorkITem(int wiId)
-        {
-            Logger.Debug("Get work item by work item id {wiId}", wiId);
-            return _workItemStore.GetWorkItem(wiId);
+            Logger.Debug("Get work item {migration}", (jiraId:issueMigration.IssueId.ToString(), wiId:issueMigration.WorkItemId));
+            return issueMigration.WorkItemId == default
+                ? GetWorkItem(issueMigration.IssueId)
+                : _workItemStore.GetWorkItem(issueMigration.WorkItemId);
         }
 
         public WorkItem GetWorkItem(IssueId jiraId)
         {
             Logger.Debug("Get work item by jira id {jiraId}", jiraId);
-            var wiql = $@"select * from  workitems where {_adoApiSettings.JiraIdField} = '" + jiraId + "'";
+            var wiql = $@"select * from  workitems where {_adoApiSettings.JiraIdField} = '{jiraId}'";
             return _workItemStore.Query(wiql).OfType<WorkItem>().FirstOrDefault();
         }
 
-        public void Delete(params WorkItem[] workItems)
+        public IEnumerable<WorkItem> GetWorkItems(IEnumerable<IssueId> jiraIds)
         {
-            Logger.Debug("(DISABLED) Deleting work items {ids}", workItems.Select(wi => $"{wi.Id} ({wi[_adoApiSettings.JiraIdField]})").ToArray());
-            //_workItemStore.DestroyWorkItems(workItems.Select(i => i.Id));
+            var ids = jiraIds.ToCollection();
+            Logger.Debug("Get work items by jira ids {jiraIds}", ids);
+            var wiql = $@"select * from  workitems where {_adoApiSettings.JiraIdField} IN ({ids.Select(i => $"'{i}'").ToCsv()})";
+            return _workItemStore.Query(wiql).OfType<WorkItem>();
+        }
+
+        public void Delete(IssueMigration migration)
+        {
+            Delete(migration.ToEnumerable());
+        }
+
+        public void Delete(IEnumerable<IssueMigration> issueMigrations)
+        {
+            var migrations = issueMigrations.ToCollection();
+            var idsToDelete = migrations.Where(m => m.WorkItemId != default).Select(m => (jiraId:m.IssueId.ToString(), wiId: m.WorkItemId));
+            var missingWiId = migrations.Where(m => m.WorkItemId == default).Select(m => m.IssueId).ToList();
+            if (missingWiId.Any())
+            {
+                var foundIds = GetWorkItems(missingWiId).Select(wi => (jiraId: wi[_adoApiSettings.JiraIdField].ToString(), wiId:wi.Id));
+                idsToDelete = idsToDelete.Concat(foundIds);
+            }
+            Delete(idsToDelete.ToArray());
+        }
+
+        private void Delete((string jiraId, int wiId)[] ids)
+        {
+            Logger.Debug("Deleting work items {ids}", ids);
+            _workItemStore.DestroyWorkItems(ids.Select(i => i.wiId));
         }
     }
 }
