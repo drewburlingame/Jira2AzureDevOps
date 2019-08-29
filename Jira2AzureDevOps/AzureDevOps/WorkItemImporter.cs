@@ -40,9 +40,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             {
                 if (_force)
                 {
-                    migration.IssueImported = false;
-                    migration.Attachments.ForEach(a => a.Imported = false);
-                    _migrationRepository.Save(migration);
+                    _migrationRepository.Reset(migration);
                 }
                 else
                 {

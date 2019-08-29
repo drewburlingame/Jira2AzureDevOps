@@ -36,7 +36,33 @@ namespace Jira2AzureDevOps.AzureDevOps
             return next(commandContext);
         }
 
-        [Command(Description = "Imports the issue(s) for the given id(s)")]
+        [Command(Description = "Resets the migration status for the given issue(s)")]
+        public void ResetMigrations(
+            [Option(ShortName = "d", LongName = "delete-from-azure", Description = "Removes the work item(s) from Azure DevOps")]
+            bool deleteFromAzure,
+            List<IssueId> issueIds)
+        {
+            foreach (var issueId in issueIds)
+            {
+                try
+                {
+                    var migration = _migrationRepository.Get(issueId);
+                    if (deleteFromAzure)
+                    {
+                        _adoContext.Api.Delete(migration);
+                    }
+                    _migrationRepository.Reset(migration);
+                    Logger.Info("Reset migration for {issueId}", issueId);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Failed to reset {issueId}", issueId);
+                }
+            }
+
+        }
+
+        [Command(Description = "Imports the given issue(s) to Azure DevOps")]
         public void ImportById(
             [Option(ShortName = "f", LongName = "force", Description = "if the item has already been imported, it will be deleted and reimported.")] 
             bool force,

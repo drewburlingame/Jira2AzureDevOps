@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Jira2AzureDevOps.Jira;
@@ -24,6 +23,14 @@ namespace Jira2AzureDevOps
         public IssueMigration GetOrCreate(IssueId issueId)
         {
             return Get(issueId) ?? new IssueMigration{IssueId = issueId};
+        }
+
+        public void Reset(IssueMigration migration)
+        {
+            migration.WorkItemId = default;
+            migration.IssueImported = false;
+            migration.Attachments.ForEach(a => a.Imported = false);
+            Save(migration);
         }
 
         public IssueMigration Get(IssueId issueId)
