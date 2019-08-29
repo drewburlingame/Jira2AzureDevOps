@@ -145,6 +145,11 @@ namespace Jira2AzureDevOps.Jira
                 migration.StatusCategory = issue.Fields.Status.StatusCategory.Name;
                 var attachments = issue.Fields.Attachments;
 
+                if (!issue.ChangeLog.Histories.Any())
+                {
+                    Logger.Warn("History missing for {issueId}", issueId);
+                }
+
                 foreach (var attachment in attachments)
                 {
                     var attachmentFile = _jiraApi.GetAttachment(attachment).Result;
