@@ -309,6 +309,7 @@
     <Compile Include="Framework\ETACalculator.cs" />
     <Compile Include="Framework\FileInfoExtensions.cs" />
     <Compile Include="Framework\Json\IssueIdConverter.cs" />
+    <Compile Include="Framework\Json\JTokenExtensions.cs" />
     <Compile Include="Framework\Json\ParseStringConverter.cs" />
     <Compile Include="Framework\NLog\DemystifyExceptionLayoutRenderer.cs" />
     <Compile Include="Framework\StringExtensions.cs" />
@@ -329,7 +330,10 @@
     <Compile Include="Jira\JiraReportCommands.cs" />
     <Compile Include="Jira\Model\Attachment.cs" />
     <Compile Include="Jira\Model\Changelog.cs" />
+    <Compile Include="Jira\Model\Comment.cs" />
+    <Compile Include="Jira\Model\CommentCollection.cs" />
     <Compile Include="Jira\Model\Creator.cs" />
+    <Compile Include="Jira\Model\IPagedCollection.cs" />
     <Compile Include="Jira\Model\IssueFields.cs" />
     <Compile Include="Jira\Model\History.cs" />
     <Compile Include="Jira\Model\Issue.cs" />
@@ -345,6 +349,7 @@
     <Compile Include="Jira\Model\StatusCategory.cs" />
     <Compile Include="Jira\Model\StatusesByProject.cs" />
     <Compile Include="Jira\Model\StatusesByType.cs" />
+    <Compile Include="Jira\Model\User.cs" />
     <Compile Include="LocalDirs.cs" />
     <Compile Include="IssueMigration.cs" />
     <Compile Include="MappingConstants.cs" />

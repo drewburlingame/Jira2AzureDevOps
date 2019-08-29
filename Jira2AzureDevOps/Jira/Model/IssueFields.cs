@@ -21,7 +21,7 @@ namespace Jira2AzureDevOps.Jira.Model
         public List<Attachment> Attachments { get; set; }
 
         [JsonProperty("comment")]
-        public ChangeLog Comment { get; set; }
+        public CommentCollection Comment { get; set; }
 
         [JsonProperty("issuelinks")]
         public List<IssueLink> IssueLinks { get; set; }

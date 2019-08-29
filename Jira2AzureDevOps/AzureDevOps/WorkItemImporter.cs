@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
+using System.Text;
 using Jira2AzureDevOps.Jira;
 using Jira2AzureDevOps.Jira.JiraApi;
 using Jira2AzureDevOps.Jira.Model;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Internals;
 using NLog;
 using WiAttachment = Microsoft.TeamFoundation.WorkItemTracking.Client.Attachment;
 
@@ -106,15 +105,34 @@ namespace Jira2AzureDevOps.AzureDevOps
         {
             workItem[_adoContext.ApiSettings.JiraIdField] = issue.Key;
 
-
-
-            workItem.Fields["System.CreatedDate"].Value = DateTime.Now.AddDays(-1);
-            workItem.Fields["System.ChangedDate"].Value = DateTime.Now.AddDays(-1);
-
             workItem.Title = issue.Fields.Summary;
             workItem.Description = issue.Fields.Description;
 
+            
+
             workItem.State = _statusMapper.GetMappedValueOrThrow(migration);
+
+            workItem.Fields["System.CreatedDate"].Value = issue.ChangeLog.Histories.First().Created.UtcDateTime;
+            workItem.Fields["System.ChangedDate"].Value = issue.ChangeLog.Histories.Last().Created.UtcDateTime;
+
+            var comments = issue.Fields.Comment.Comments;
+            if (comments.Any())
+            {
+                var sb = new StringBuilder(workItem.Description);
+                var headerBar = new string('-', 50);
+                var smallHeaderBar = new string('-', 20);
+                sb.AppendLine(
+                    $"{Environment.NewLine}{headerBar}{Environment.NewLine}  COMMENTS{Environment.NewLine}{headerBar}{Environment.NewLine}");
+                foreach (var comment in comments)
+                {
+                    sb.AppendLine($"[{comment.Author.DisplayName} @ {comment.Created}]");
+                    sb.AppendLine(comment.Body);
+                    sb.AppendLine($"{smallHeaderBar}");
+                }
+
+                workItem.Description = sb.ToString();
+            }
+
 
             foreach (var attachmentMigration in migration.Attachments)
             {

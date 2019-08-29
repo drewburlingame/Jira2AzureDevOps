@@ -6,8 +6,10 @@ using System.Linq;
 using Jira2AzureDevOps.Framework;
 using Jira2AzureDevOps.Jira;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using NLog;
 using Project = Microsoft.TeamFoundation.WorkItemTracking.Client.Project;
+using WorkItem = Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem;
 
 namespace Jira2AzureDevOps.AzureDevOps
 {

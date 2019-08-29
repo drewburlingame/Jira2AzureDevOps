@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Jira2AzureDevOps.Jira.Model
 {
-    public partial class ChangeLog : IPagedCollection
+    public partial class CommentCollection : IPagedCollection
     {
         [JsonProperty("startAt")]
         public long StartAt { get; set; }
@@ -14,7 +14,7 @@ namespace Jira2AzureDevOps.Jira.Model
         [JsonProperty("total")]
         public long Total { get; set; }
 
-        [JsonProperty("histories", NullValueHandling = NullValueHandling.Ignore)]
-        public List<History> Histories { get; set; }
+        [JsonProperty("comments", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Comment> Comments { get; set; }
     }
 }
