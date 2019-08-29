@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Jira2AzureDevOps.Framework.Json;
 using Jira2AzureDevOps.Jira.ArgumentModels;
+using Newtonsoft.Json.Linq;
 
 namespace Jira2AzureDevOps.Jira
 {
@@ -133,7 +135,6 @@ namespace Jira2AzureDevOps.Jira
             // waiting on results prevents overwhelming Jira API resulting in 503's
 
             var issueData = _jiraApi.GetIssue(issueId).Result;
-
             var migration = new IssueMigration {IssueId = issueId};
 
             try
@@ -155,6 +156,9 @@ namespace Jira2AzureDevOps.Jira
 
                 migration.ExportCompleted = true;
                 _migrationRepository.Save(migration);
+
+                AlertIfPartialPagedData(issueId, issueData);
+
                 Logger.Info($"Exported issue {issueId} ({index + 1}/{_totalIssueCount})");
             }
             catch (Exception e)
@@ -162,7 +166,39 @@ namespace Jira2AzureDevOps.Jira
                 e.Data["IssueId"] = issueId.ToString();
                 throw;
             }
+        }
 
+        private void AlertIfPartialPagedData(IssueId issueId, JToken issueData)
+        {
+            issueData.WalkNode(o =>
+            {
+                if (TryGetPageData(o, out int maxResults, out int total))
+                {
+                    if (o.Path == "changelog" || o.Path.EndsWith(".worklog", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // TODO: when we import history, log as Error
+                        Logger.Debug("Pages are missing for {issueId} {page}", issueId, new { o.Path, maxResults, total });
+                    }
+                    else
+                    {
+                        Logger.Error("Pages are missing for {issueId} {page}", issueId, new {o.Path, maxResults, total});
+                    }
+                }
+            });
+        }
+
+        private static bool TryGetPageData(JObject jObject, out int maxResults, out int total)
+        {
+            if (jObject.ContainsKey("maxResults") && jObject.ContainsKey("total"))
+            {
+                maxResults = jObject.Value<int>("maxResults");
+                total = jObject.Value<int>("total");
+                return total > maxResults;
+            }
+
+            maxResults = 0;
+            total = 0;
+            return false;
         }
 
         private IEnumerable<Attachment> GetRemovedAttachments(Issue issue)
