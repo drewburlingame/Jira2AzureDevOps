@@ -303,6 +303,7 @@
     <Compile Include="Framework\CommandDotNet\LogHeaderMiddleware.cs" />
     <Compile Include="Framework\CommandDotNet\NoHeadersAttribute.cs" />
     <Compile Include="Framework\CommandDotNet\PasswordAttribute.cs" />
+    <Compile Include="Framework\DictionaryExtensions.cs" />
     <Compile Include="Framework\DirectoryExtensions.cs" />
     <Compile Include="Framework\CommandDotNet\DisableConsoleLoggingAttribute.cs" />
     <Compile Include="Framework\EnumerableExtensions.cs" />
@@ -355,6 +356,7 @@
     <Compile Include="IssueMigration.cs" />
     <Compile Include="MappingConstants.cs" />
     <Compile Include="MigrationRepository.cs" />
+    <Compile Include="MigrationMetaDataService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkspaceSettings.cs" />

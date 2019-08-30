@@ -7,9 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Jira2AzureDevOps.Framework.Json;
 using Jira2AzureDevOps.Jira.ArgumentModels;
-using Newtonsoft.Json.Linq;
 
 namespace Jira2AzureDevOps.Jira
 {
@@ -22,7 +20,7 @@ namespace Jira2AzureDevOps.Jira
 
         private IJiraApi _jiraApi;
         private JiraApiSettings _jiraApiSettings;
-        private MigrationRepository _migrationRepository;
+        private MigrationMetaDataService _migrationMetaDataService;
 
         public Task<int> Interceptor(
             CommandContext commandContext, Func<CommandContext, Task<int>> next,
@@ -31,7 +29,8 @@ namespace Jira2AzureDevOps.Jira
             _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings);
             _jiraApi = _jiraContext.Api;
             _jiraApiSettings = _jiraContext.ApiSettings;
-            _migrationRepository = new MigrationRepository(_jiraContext.LocalDirs);
+            _migrationMetaDataService = new MigrationMetaDataService(_jiraContext);
+
             return next(commandContext);
         }
 
@@ -110,73 +109,7 @@ namespace Jira2AzureDevOps.Jira
 
         private void ExportIssue(IssueId issueId)
         {
-            // waiting on results prevents overwhelming Jira API resulting in 503's
-
-            var issueData = _jiraApi.GetIssue(issueId).Result;
-            var migration = new IssueMigration {IssueId = issueId};
-
-            try
-            {
-                var issue = issueData.ToObject<Issue>();
-                migration.IssueType = issue.Fields.IssueType.Name;
-                migration.Status = issue.Fields.Status.Name;
-                migration.StatusCategory = issue.Fields.Status.StatusCategory.Name;
-                var attachments = issue.Fields.Attachments;
-
-                if (!issue.ChangeLog.Histories.Any())
-                {
-                    Logger.Warn("History missing for {issueId}", issueId);
-                }
-
-                foreach (var attachment in attachments)
-                {
-                    var attachmentFile = _jiraApi.GetAttachment(attachment).Result;
-                    migration.Attachments.Add(new AttachmentMigration
-                    {
-                        File = _jiraContext.LocalDirs.GetRelativePath(attachmentFile)
-                    });
-                }
-
-                migration.ExportCompleted = true;
-                _migrationRepository.Save(migration);
-
-                AlertIfPartialPagedData(issueId, issueData);
-            }
-            catch (Exception e)
-            {
-                e.Data["IssueId"] = issueId.ToString();
-                throw;
-            }
-        }
-
-        private void AlertIfPartialPagedData(IssueId issueId, JToken issueData)
-        {
-            issueData.WalkNode(o =>
-            {
-                if (o.TryGetJiraPageCounts(out int maxResults, out int total))
-                {
-                    if (o.Path == "changelog" || o.Path.EndsWith(".worklog", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // TODO: when we import history, log as Error
-                        Logger.Debug("Pages are missing for {issueId} {page}", issueId, new { o.Path, maxResults, total });
-                    }
-                    else
-                    {
-                        Logger.Error("Pages are missing for {issueId} {page}", issueId, new {o.Path, maxResults, total});
-                    }
-                }
-            });
-        }
-
-        private IEnumerable<Attachment> GetRemovedAttachments(Issue issue)
-        {
-            return issue.ChangeLog.Histories.SelectMany(h =>
-                    h.Items
-                        .Where(i => i.Field == "Attachment" && i.RemovedId != null)
-                        .Select(i => i.RemovedId))
-                .Select(id => _jiraApi.GetAttachmentMetadata(id).Result)
-                .Select(j => j.ToObject<Attachment>())
-                .ToList();
+            _migrationMetaDataService.UpdateMigrationMetaData(new IssueMigration {IssueId = issueId});
         }
     }
 }

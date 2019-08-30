@@ -11,6 +11,10 @@ namespace Jira2AzureDevOps
 {
     public class LocalDirs
     {
+        private const string IssuesDirName = "issues";
+        private const string AttachmentsDirName = "attachments";
+        private const string MetaDirName = "meta";
+
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public DirectoryInfo Root { get; }
@@ -27,9 +31,9 @@ namespace Jira2AzureDevOps
 
             Logger.Info("root directory {rootDir}", rootDir);
             Root = new DirectoryInfo(rootDir);
-            Issues = new DirectoryInfo(Path.Combine(rootDir, "issues"));
-            Attachments = new DirectoryInfo(Path.Combine(rootDir, "attachments"));
-            Meta = new DirectoryInfo(Path.Combine(rootDir, "meta"));
+            Issues = new DirectoryInfo(Path.Combine(rootDir, IssuesDirName));
+            Attachments = new DirectoryInfo(Path.Combine(rootDir, AttachmentsDirName));
+            Meta = new DirectoryInfo(Path.Combine(rootDir, MetaDirName));
 
             Root.FullName.EnsureDirectoryExists();
             Issues.FullName.EnsureDirectoryExists();
@@ -59,6 +63,13 @@ namespace Jira2AzureDevOps
         public IEnumerable<FileInfo> GetAllIssueMigrationStatusFiles() => Directory
             .GetFiles(Issues.FullName, "migration-status.json", SearchOption.AllDirectories)
             .Select(p => new FileInfo(p));
+
+        public string GetAttachmentIdFromPath(string path)
+        {
+            var indexOfFileName = path.LastIndexOf(Path.DirectorySeparatorChar);
+            var indexOfId = path.LastIndexOf(Path.DirectorySeparatorChar, indexOfFileName - 1);
+            return path.Substring(indexOfId + 1, indexOfFileName - indexOfId - 1);
+        }
 
         public DirectoryInfo GetAttachmentsDir(string attachmentId) =>
             new DirectoryInfo(Path.Combine(Attachments.FullName, attachmentId))
