@@ -39,8 +39,8 @@ namespace Jira2AzureDevOps.AzureDevOps
             return next(commandContext);
         }
 
-        [Command(Description = "Resets the migration status for the given issue(s)")]
-        public void ResetMigrations(
+        [Command(Description = "Resets the import status for the given issue(s)")]
+        public void ResetImportStatus(
             [Option(ShortName = "d", LongName = "delete-from-azure", Description = "Removes the work item(s) from Azure DevOps")]
             bool deleteFromAzure,
             List<IssueId> issueIds)
