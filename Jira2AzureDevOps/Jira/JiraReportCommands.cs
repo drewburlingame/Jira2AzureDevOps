@@ -27,9 +27,9 @@ namespace Jira2AzureDevOps.Jira
 
         [DisableConsoleLogging]
         [Command(Description = "prints all exported project keys")]
-        public async Task ProjectsWithIssues()
+        public async Task ExportedProjects()
         {
-            var projects = _jiraContext.CachedJiraApi.ListProjectsWithIssues().ToList();
+            var projects = _jiraContext.LocalJiraApi.ExportedProjectKeys().ToList();
 
             var maxName = projects.Max(e => e.Key.Length);
             foreach (var project in projects.OrderBy(p => p.Key))
@@ -168,8 +168,9 @@ namespace Jira2AzureDevOps.Jira
 
         private IEnumerable<(string project, string issueType, string description)> GetIssueTypesFromExported(ProjectFilter projectFilter)
         {
-            return _migrationRepository.GetAll(out int count)
-                .Where(m => projectFilter.IncludesProject(m.IssueId.Project))
+            return _jiraContext.LocalJiraApi.GetIssueIds(projectFilter, out int totalCount)
+                .Select(_migrationRepository.Get)
+                .Where(m => m != null)
                 .Select(m => (m.IssueId.Project, m.IssueType, "description not available in exported view"));
         }
 
@@ -203,8 +204,9 @@ namespace Jira2AzureDevOps.Jira
         private IEnumerable<(string project, string issueType, string category, string status)>
             GetStatusesFromExported(ProjectFilter projectFilter)
         {
-            return _migrationRepository.GetAll(out int count)
-                .Where(m => projectFilter.IncludesProject(m.IssueId.Project))
+            return _jiraContext.LocalJiraApi.GetIssueIds(projectFilter, out int totalCount)
+                .Select(_migrationRepository.Get)
+                .Where(m => m != null)
                 .Select(m => (m.IssueId.Project, m.IssueType, m.StatusCategory, m.Status));
         }
     }

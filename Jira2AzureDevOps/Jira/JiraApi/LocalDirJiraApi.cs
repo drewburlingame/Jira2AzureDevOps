@@ -24,14 +24,36 @@ namespace Jira2AzureDevOps.Jira.JiraApi
             _issuesByProject = LoadedIssuesByProject(localDirs);
         }
 
-        public IEnumerable<(string Key, int Count)> ListProjectsWithIssues()
+        public IEnumerable<(string Key, int Count)> ExportedProjectKeys()
         {
             return _issuesByProject.Select(kvp => (kvp.Key, kvp.Value.Count));
         }
 
         public Task<int> GetTotalIssueCount(ICollection<string> projectIds, IssueId resumeAfterId = null)
         {
-            var totalIssueCount = _issuesByProject.Where(kvp => projectIds.Contains(kvp.Key)).Sum(kvp => kvp.Value.Count);
+            var filteredProjects = _issuesByProject.Where(kvp => projectIds.Contains(kvp.Key));
+
+            int totalIssueCount = 0;
+            if (resumeAfterId == null)
+            {
+                totalIssueCount = filteredProjects.Sum(kvp => kvp.Value.Count);
+            }
+            else
+            {
+                foreach (var project in filteredProjects)
+                {
+                    var comparison = string.Compare(project.Key, resumeAfterId.Project, StringComparison.Ordinal);
+                    if (comparison == 0)
+                    {
+                        totalIssueCount += project.Value.Count(id => id > resumeAfterId);
+                    }
+                    else if (comparison > 0)
+                    {
+                        totalIssueCount += project.Value.Count;
+                    }
+                }
+            }
+
             return Task.FromResult(totalIssueCount);
         }
 

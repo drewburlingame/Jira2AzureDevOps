@@ -31,6 +31,12 @@ namespace Jira2AzureDevOps
                 // waiting on results prevents overwhelming Jira API resulting in 503's
                 var issueData = _jiraContext.Api.GetIssue(issueId).Result;
 
+                if (issueData == null)
+                {
+                    Logger.Error($"Failed to retrieve json data for {issueId}", issueId);
+                    return;
+                }
+
                 var issue = issueData.ToObject<Issue>();
                 migration.IssueType = issue.Fields.IssueType.Name;
                 migration.Status = issue.Fields.Status.Name;

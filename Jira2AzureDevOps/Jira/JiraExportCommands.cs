@@ -1,11 +1,9 @@
 ﻿using CommandDotNet;
 using Jira2AzureDevOps.Framework;
 using Jira2AzureDevOps.Jira.JiraApi;
-using Jira2AzureDevOps.Jira.Model;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Jira2AzureDevOps.Jira.ArgumentModels;
 
@@ -75,7 +73,7 @@ namespace Jira2AzureDevOps.Jira
         }
 
         [Command(Description = "Exports issues for the given project(s)")]
-        public int IssuesByProject(
+        public void IssuesByProject(
             ProjectFilter projectFilter,
             [Option(Description = "Resumes export after this issue")]
             IssueId resumeAfter,
@@ -94,17 +92,9 @@ namespace Jira2AzureDevOps.Jira
                 ((CacheJiraApi)_jiraApi).IssueListSource = issueListSource.GetValueOrDefault(IssueSource.Both);
             }
 
-            var projects = projectFilter.Projects;
-            projects.Sort();
-            var totalCount = _jiraContext.Api.GetTotalIssueCount(projects, resumeAfter).Result;
-
-            Logger.Info("Total issue count {totalIssueCount} for {projects}", totalCount, projects.ToCsv());
-
-            projects
-                .SelectMany(p => _jiraContext.Api.GetIssueIdsByProject(p, resumeAfter))
-                .EnumerateOperation(totalCount, ExportIssue);
-
-            return 0;
+            var issueIds = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter);
+            Logger.Info("Total issue count {totalIssueCount} for {projects}", totalCount, projectFilter.Projects.ToOrderedCsv());
+            issueIds.EnumerateOperation(totalCount, ExportIssue);
         }
 
         private void ExportIssue(IssueId issueId)
