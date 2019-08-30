@@ -5,7 +5,7 @@ using Jira2AzureDevOps.Framework;
 
 namespace Jira2AzureDevOps.Jira.ArgumentModels
 {
-    internal class ProjectFilter : IArgumentModel
+    public class ProjectFilter : IArgumentModel
     {
         [Option(ShortName = "P", LongName = "projects",
             Description = "If provided, the operation is applied to only these projects")]

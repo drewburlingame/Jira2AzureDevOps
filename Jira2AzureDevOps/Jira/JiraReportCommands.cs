@@ -168,7 +168,7 @@ namespace Jira2AzureDevOps.Jira
 
         private IEnumerable<(string project, string issueType, string description)> GetIssueTypesFromExported(ProjectFilter projectFilter)
         {
-            return _migrationRepository.GetAll()
+            return _migrationRepository.GetAll(out int count)
                 .Where(m => projectFilter.IncludesProject(m.IssueId.Project))
                 .Select(m => (m.IssueId.Project, m.IssueType, "description not available in exported view"));
         }
@@ -203,7 +203,7 @@ namespace Jira2AzureDevOps.Jira
         private IEnumerable<(string project, string issueType, string category, string status)>
             GetStatusesFromExported(ProjectFilter projectFilter)
         {
-            return _migrationRepository.GetAll()
+            return _migrationRepository.GetAll(out int count)
                 .Where(m => projectFilter.IncludesProject(m.IssueId.Project))
                 .Select(m => (m.IssueId.Project, m.IssueType, m.StatusCategory, m.Status));
         }

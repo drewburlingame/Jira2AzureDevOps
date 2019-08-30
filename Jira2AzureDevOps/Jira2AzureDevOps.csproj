@@ -313,6 +313,7 @@
     <Compile Include="Framework\Json\ParseStringConverter.cs" />
     <Compile Include="Framework\NLog\DemystifyExceptionLayoutRenderer.cs" />
     <Compile Include="Framework\StringExtensions.cs" />
+    <Compile Include="ConsoleEnumerator.cs" />
     <Compile Include="Jira\ArgumentModels\ProjectFilter.cs" />
     <Compile Include="Jira\IssueId.cs" />
     <Compile Include="Jira\JiraApi\CacheJiraApi.cs" />

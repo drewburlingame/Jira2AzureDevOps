@@ -2,7 +2,6 @@
 using Jira2AzureDevOps.Framework;
 using Jira2AzureDevOps.Jira.JiraApi;
 using Jira2AzureDevOps.Jira.Model;
-using MoreLinq;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ using Newtonsoft.Json.Linq;
 namespace Jira2AzureDevOps.Jira
 {
     [Command(Name = "export", Description = "Commands to export issues and metadata")]
-    class JiraExportCommands
+    public class JiraExportCommands
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -23,9 +22,6 @@ namespace Jira2AzureDevOps.Jira
 
         private IJiraApi _jiraApi;
         private JiraApiSettings _jiraApiSettings;
-
-        private int _totalIssueCount;
-        private EtaCalculator _etaCalculator;
         private MigrationRepository _migrationRepository;
 
         public Task<int> Interceptor(
@@ -76,13 +72,7 @@ namespace Jira2AzureDevOps.Jira
         [Command(Description = "Exports issues for the given id(s)")]
         public void IssuesById(List<IssueId> issueIds)
         {
-            _totalIssueCount = issueIds.Count;
-
-            _etaCalculator = new EtaCalculator(5, maximumDuration: TimeSpan.FromMinutes(5).Ticks, _totalIssueCount);
-
-            issueIds
-                .TakeWhile(i => Cancellation.IsNotRequested)
-                .ForEach(ExportIssue);
+            issueIds.EnumerateOperation(issueIds.Count, ExportIssue);
         }
 
         [Command(Description = "Exports issues for the given project(s)")]
@@ -107,30 +97,18 @@ namespace Jira2AzureDevOps.Jira
 
             var projects = projectFilter.Projects;
             projects.Sort();
+            var totalCount = _jiraContext.Api.GetTotalIssueCount(projects, resumeAfter).Result;
 
-            _totalIssueCount = _jiraApi.GetTotalIssueCount(projects, resumeAfter).Result;
-            Logger.Info("Total issue count {totalIssueCount} for {projects}", _totalIssueCount, projects.ToCsv());
+            Logger.Info("Total issue count {totalIssueCount} for {projects}", totalCount, projects.ToCsv());
 
-            _etaCalculator = new EtaCalculator(10, maximumDuration: TimeSpan.FromMinutes(10).Ticks, _totalIssueCount);
-
-            projects.SelectMany(p => _jiraApi.GetIssueIdsByProject(p, resumeAfter))
-                .TakeWhile(i => Cancellation.IsNotRequested)
-                .ForEach(ExportIssueAndLog);
+            projects
+                .SelectMany(p => _jiraContext.Api.GetIssueIdsByProject(p, resumeAfter))
+                .EnumerateOperation(totalCount, ExportIssue);
 
             return 0;
         }
 
-        private void ExportIssueAndLog(IssueId issueId, int index)
-        {
-            ExportIssue(issueId, index);
-            _etaCalculator.Increment();
-            if (index % 10 == 0 && _etaCalculator.TryGetEta(out var etr, out var eta))
-            {
-                Logger.Info(new { etr, eta });
-            }
-        }
-
-        private void ExportIssue(IssueId issueId, int index)
+        private void ExportIssue(IssueId issueId)
         {
             // waiting on results prevents overwhelming Jira API resulting in 503's
 
@@ -163,8 +141,6 @@ namespace Jira2AzureDevOps.Jira
                 _migrationRepository.Save(migration);
 
                 AlertIfPartialPagedData(issueId, issueData);
-
-                Logger.Info($"Exported issue {issueId} ({index + 1}/{_totalIssueCount})");
             }
             catch (Exception e)
             {
@@ -177,7 +153,7 @@ namespace Jira2AzureDevOps.Jira
         {
             issueData.WalkNode(o =>
             {
-                if (TryGetPageData(o, out int maxResults, out int total))
+                if (o.TryGetJiraPageCounts(out int maxResults, out int total))
                 {
                     if (o.Path == "changelog" || o.Path.EndsWith(".worklog", StringComparison.OrdinalIgnoreCase))
                     {
@@ -190,20 +166,6 @@ namespace Jira2AzureDevOps.Jira
                     }
                 }
             });
-        }
-
-        private static bool TryGetPageData(JObject jObject, out int maxResults, out int total)
-        {
-            if (jObject.ContainsKey("maxResults") && jObject.ContainsKey("total"))
-            {
-                maxResults = jObject.Value<int>("maxResults");
-                total = jObject.Value<int>("total");
-                return total > maxResults;
-            }
-
-            maxResults = 0;
-            total = 0;
-            return false;
         }
 
         private IEnumerable<Attachment> GetRemovedAttachments(Issue issue)

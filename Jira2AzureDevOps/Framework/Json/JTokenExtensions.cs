@@ -24,5 +24,19 @@ namespace Jira2AzureDevOps.Framework.Json
                 }
             }
         }
+
+        internal static bool TryGetJiraPageCounts(this JObject jObject, out int maxResults, out int total)
+        {
+            if (jObject.ContainsKey("maxResults") && jObject.ContainsKey("total"))
+            {
+                maxResults = jObject.Value<int>("maxResults");
+                total = jObject.Value<int>("total");
+                return total > maxResults;
+            }
+
+            maxResults = 0;
+            total = 0;
+            return false;
+        }
     }
 }
