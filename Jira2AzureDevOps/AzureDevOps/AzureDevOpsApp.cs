@@ -4,7 +4,6 @@ using Jira2AzureDevOps.Jira;
 using Jira2AzureDevOps.Jira.JiraApi;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +20,7 @@ namespace Jira2AzureDevOps.AzureDevOps
         private MigrationRepository _migrationRepository;
         private JiraContext _jiraContext;
         private AdoContext _adoContext;
+        private MigrationMetaDataService _migrationMetaDataService;
 
         public Task<int> Intercept(
             CommandContext commandContext, Func<CommandContext, Task<int>> next,
@@ -34,6 +34,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             }
             _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings);
             _migrationRepository = new MigrationRepository(_jiraContext.LocalDirs);
+            _migrationMetaDataService = new MigrationMetaDataService(_jiraContext);
 
             return next(commandContext);
         }
@@ -44,7 +45,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             bool deleteFromAzure,
             List<IssueId> issueIds)
         {
-            foreach (var issueId in issueIds)
+            issueIds.EnumerateOperation(issueIds.Count, issueId => 
             {
                 try
                 {
@@ -60,7 +61,7 @@ namespace Jira2AzureDevOps.AzureDevOps
                 {
                     Logger.Error(e, "Failed to reset {issueId}", issueId);
                 }
-            }
+            });
         }
 
         [Command(Description = "Imports the issues for the given Jira project(s) to Azure DevOps")]
@@ -70,8 +71,11 @@ namespace Jira2AzureDevOps.AzureDevOps
             FileInfo issueTypeMappingFile,
             FileInfo statusMappingFile)
         {
-            var allMigrations = _migrationRepository.GetAll(out var count);
-            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, count, allMigrations);
+            var allMigrations = _jiraContext.Api
+                .GetIssueIds(projectFilter, out int totalCount)
+                .Select(_migrationMetaDataService.Get);
+
+            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, totalCount, allMigrations);
         }
 
         [Command(Description = "Imports the given issue(s) to Azure DevOps")]
@@ -88,19 +92,7 @@ namespace Jira2AzureDevOps.AzureDevOps
                 return;
             }
 
-            var issueMigrations = issueIds.Select(id => _migrationRepository.Get(id)).Where(m => m != null).ToList();
-            if (issueMigrations.Count < issueIds.Count)
-            {
-                var missingIssueIds = issueIds.Except(issueMigrations.Select(m => m.IssueId)).ToOrderedCsv();
-
-                Console.Out.WriteLine($"Migrations were not found for {missingIssueIds}");
-                Console.Out.WriteLine("continue without them: y");
-                var input = Console.In.ReadLine();
-                if (!"y".Equals(input, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-            }
+            var issueMigrations = issueIds.Select(_migrationMetaDataService.Get).ToList();
 
             var pendingMigrations = issueMigrations.Where(m => !m.ImportComplete).ToList();
             if (!force && pendingMigrations.Count < issueMigrations.Count)
@@ -151,14 +143,23 @@ namespace Jira2AzureDevOps.AzureDevOps
                 _adoContext, _jiraContext, 
                 statusMapper, issueTypeCsvMapper);
 
-            var stopwatch = Stopwatch.StartNew();
             int imported = 0;
             int errored = 0;
 
-            foreach (var migration in issueMigrations
-                .Where(m => force || !m.ImportComplete)
-                .TakeWhile(m => Cancellation.IsNotRequested))
+            issueMigrations.EnumerateOperation(totalCount, migration =>
             {
+                if (migration.ImportComplete)
+                {
+                    if (force)
+                    {
+                        Logger.Debug("Forcing import for already imported migration {issueId}", migration.IssueId);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                
                 try
                 {
                     if (importer.TryImport(migration))
@@ -171,14 +172,9 @@ namespace Jira2AzureDevOps.AzureDevOps
                     errored++;
                     Logger.Error(e, "Failed to import {issueId}", migration.IssueId);
                 }
+            });
 
-                if((imported + errored)%20 == 0)
-                {
-                    Logger.Info(new{total=totalCount, remaining=(totalCount-imported-errored), imported, errored});
-                }
-            }
-
-            Logger.Info(new {imported, errored, runTime = stopwatch.Elapsed});
+            Logger.Info(new {imported, errored});
         }
     }
 }

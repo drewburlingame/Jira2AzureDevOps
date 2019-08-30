@@ -23,6 +23,18 @@ namespace Jira2AzureDevOps
             _migrationRepository = new MigrationRepository(jiraContext.LocalDirs);
         }
 
+        public IssueMigration Create(IssueId issueId)
+        {
+            return _migrationRepository.Create(issueId);
+        }
+
+        public IssueMigration Get(IssueId issueId)
+        {
+            var migration = _migrationRepository.GetOrCreate(issueId);
+            UpdateMigrationMetaData(migration);
+            return migration;
+        }
+
         public void UpdateMigrationMetaData(IssueMigration migration)
         {
             IssueId issueId = migration.IssueId;

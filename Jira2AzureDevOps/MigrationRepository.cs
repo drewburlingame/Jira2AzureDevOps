@@ -15,11 +15,9 @@ namespace Jira2AzureDevOps
             _localDirs = localDirs;
         }
 
-        public IEnumerable<IssueMigration> GetAll(out int count)
+        public IssueMigration Create(IssueId issueId)
         {
-            var files = _localDirs.GetAllIssueMigrationStatusFiles().ToList();
-            count = files.Count;
-            return files.Select(LoadFromFile);
+            return new IssueMigration { IssueId = issueId };
         }
 
         public IssueMigration GetOrCreate(IssueId issueId)
