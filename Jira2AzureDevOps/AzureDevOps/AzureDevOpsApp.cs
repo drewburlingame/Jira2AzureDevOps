@@ -65,26 +65,17 @@ namespace Jira2AzureDevOps.AzureDevOps
         }
 
         [Command(Description = "Imports the issues for the given Jira project(s) to Azure DevOps")]
-        public void ImportAll(ProjectFilter projectFilter,
-            [Option(ShortName = "f", LongName = "force", Description = "if the item has already been imported, it will be deleted and reimported.")]
-            bool force,
-            FileInfo issueTypeMappingFile,
-            FileInfo statusMappingFile)
+        public void ImportAll(ProjectFilter projectFilter, ImportOptions importOptions)
         {
             var allMigrations = _jiraContext.Api
                 .GetIssueIds(projectFilter, out int totalCount)
                 .Select(_migrationMetaDataService.Get);
 
-            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, totalCount, allMigrations);
+            ImportMigrations(importOptions, totalCount, allMigrations);
         }
 
         [Command(Description = "Imports the given issue(s) to Azure DevOps")]
-        public void ImportById(
-            [Option(ShortName = "f", LongName = "force", Description = "if the item has already been imported, it will be deleted and reimported.")] 
-            bool force,
-            FileInfo issueTypeMappingFile,
-            FileInfo statusMappingFile,
-            List<IssueId> issueIds)
+        public void ImportById(ImportOptions importOptions, List<IssueId> issueIds)
         {
             if (issueIds.IsNullOrEmpty())
             {
@@ -92,10 +83,11 @@ namespace Jira2AzureDevOps.AzureDevOps
                 return;
             }
 
-            var issueMigrations = issueIds.Select(_migrationMetaDataService.Get).ToList();
+            // distinct because failure files could have issues appended more than once when reused
+            var issueMigrations = issueIds.Distinct().Select(_migrationMetaDataService.Get).ToList();
 
             var pendingMigrations = issueMigrations.Where(m => !m.ImportComplete).ToList();
-            if (!force && pendingMigrations.Count < issueMigrations.Count)
+            if (!importOptions.Force && pendingMigrations.Count < issueMigrations.Count)
             {
                 var migratedIssueIds = issueMigrations.Where(m => m.ImportComplete).ToOrderedCsv();
 
@@ -105,7 +97,7 @@ namespace Jira2AzureDevOps.AzureDevOps
                 var input = Console.In.ReadLine();
                 if (!"f".Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
-                    force = true;
+                    importOptions.Force = true;
                 }
                 else if (!"y".Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
@@ -113,16 +105,13 @@ namespace Jira2AzureDevOps.AzureDevOps
                 }
             }
 
-            ImportMigrations(force, issueTypeMappingFile, statusMappingFile, issueMigrations.Count, issueMigrations);
+            ImportMigrations(importOptions, issueMigrations.Count, issueMigrations);
         }
 
-        private void ImportMigrations(
-            bool force, 
-            FileInfo issueTypeMappingFile, 
-            FileInfo statusMappingFile,
-            int totalCount,
-            IEnumerable<IssueMigration> issueMigrations)
+        private void ImportMigrations(ImportOptions importOptions, int totalCount, IEnumerable<IssueMigration> issueMigrations)
         {
+            var issueTypeMappingFile = importOptions.IssueTypeMappingFile;
+            var statusMappingFile = importOptions.StatusMappingFile;
             if (!issueTypeMappingFile.Exists)
             {
                 Console.Out.WriteLine("issue type mapping file not found:" + issueTypeMappingFile.FullName);
@@ -134,11 +123,28 @@ namespace Jira2AzureDevOps.AzureDevOps
                 return;
             }
 
-            var statusMapper = new StatusCsvMapper(statusMappingFile);
-            statusMapper.LoadMap();
             var issueTypeCsvMapper = new IssueTypeCsvMapper(issueTypeMappingFile);
             issueTypeCsvMapper.LoadMap();
+            var statusMapper = new StatusCsvMapper(statusMappingFile);
+            statusMapper.LoadMap();
 
+            ImportMigrations(
+                importOptions.Force,
+                importOptions.FailFile,
+                issueTypeCsvMapper,
+                statusMapper,
+                totalCount, 
+                issueMigrations);
+        }
+
+        private void ImportMigrations(
+            bool force,
+            FileInfo failFile,
+            IssueTypeCsvMapper issueTypeCsvMapper,
+            StatusCsvMapper statusMapper,
+            int totalCount,
+            IEnumerable<IssueMigration> issueMigrations)
+        {
             var importer = new WorkItemImporter(force, _migrationRepository, 
                 _adoContext, _jiraContext, 
                 statusMapper, issueTypeCsvMapper);
@@ -170,11 +176,17 @@ namespace Jira2AzureDevOps.AzureDevOps
                 catch (Exception e)
                 {
                     errored++;
+                    failFile?.AppendAllLines(migration.IssueId.ToString().ToEnumerable());
                     Logger.Error(e, "Failed to import {issueId}", migration.IssueId);
                 }
             });
 
-            Logger.Info(new {imported, errored});
+            if (errored == 0)
+            {
+                failFile = null;
+            }
+            
+            Logger.Info(new {imported, errored, failFile});
         }
     }
 }

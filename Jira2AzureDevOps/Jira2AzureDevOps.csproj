@@ -292,6 +292,7 @@
     <Compile Include="AzureDevOps\AdoContext.cs" />
     <Compile Include="AzureDevOps\AzureDevOpsApp.cs" />
     <Compile Include="AzureDevOps\CsvMapperBase.cs" />
+    <Compile Include="AzureDevOps\ImportOptions.cs" />
     <Compile Include="AzureDevOps\IssueTypeCsvMapper.cs" />
     <Compile Include="AzureDevOps\WorkItemImporter.cs" />
     <Compile Include="AzureDevOps\AdoApi.cs" />
