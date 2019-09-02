@@ -58,6 +58,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jira2AzureDevOps.Console\Jira2AzureDevOps.Console.csproj">
+      <Project>{013f3375-95cf-4a1e-82b0-f99fa2ac2ecd}</Project>
+      <Name>Jira2AzureDevOps.Console</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Jira2AzureDevOps.Logic\Jira2AzureDevOps.Logic.csproj">
+      <Project>{7a68a1d1-6465-4263-b4a4-2ec1cdd20adb}</Project>
+      <Name>Jira2AzureDevOps.Logic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jira2AzureDevOps\Jira2AzureDevOps.csproj">
       <Project>{a78cb14a-3e9a-4180-a584-d7ba9415c092}</Project>
       <Name>Jira2AzureDevOps</Name>

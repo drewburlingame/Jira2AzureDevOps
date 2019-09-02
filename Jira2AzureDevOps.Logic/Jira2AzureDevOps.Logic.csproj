@@ -4,19 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A78CB14A-3E9A-4180-A584-D7BA9415C092}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Jira2AzureDevOps</RootNamespace>
-    <AssemblyName>Jira2AzureDevOps</AssemblyName>
+    <ProjectGuid>{7A68A1D1-6465-4263-B4A4-2EC1CDD20ADB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Jira2AzureDevOps.Logic</RootNamespace>
+    <AssemblyName>Jira2AzureDevOps.Logic</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,7 +25,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,15 +38,6 @@
     </Reference>
     <Reference Include="Ben.Demystifier, Version=0.1.0.0, Culture=neutral, PublicKeyToken=a6d206e05440431a, processorArchitecture=MSIL">
       <HintPath>..\packages\Ben.Demystifier.0.1.4\lib\net45\Ben.Demystifier.dll</HintPath>
-    </Reference>
-    <Reference Include="CommandDotNet, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommandDotNet.3.0.0-preview3\lib\netstandard2.0\CommandDotNet.dll</HintPath>
-    </Reference>
-    <Reference Include="FluentValidation, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentValidation.7.6.105\lib\net45\FluentValidation.dll</HintPath>
-    </Reference>
-    <Reference Include="Humanizer, Version=2.6.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Humanizer.Core.2.6.2\lib\netstandard2.0\Humanizer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=5.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.5.2.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
@@ -204,16 +193,7 @@
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
     </Reference>
-    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ComponentModel.Annotations.4.5.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.ComponentModel.Primitives, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ComponentModel.Primitives.4.3.0\lib\net45\System.ComponentModel.Primitives.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -234,11 +214,6 @@
     </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reflection, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Reflection.Metadata, Version=1.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reflection.Metadata.1.6.0\lib\netstandard2.0\System.Reflection.Metadata.dll</HintPath>
@@ -286,28 +261,69 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Migrations\AttachmentMigration.cs" />
+    <Compile Include="Azure\AdoApi.cs" />
+    <Compile Include="Azure\AdoContext.cs" />
+    <Compile Include="Azure\CsvMapperBase.cs" />
+    <Compile Include="Azure\IAdoApiSettings.cs" />
+    <Compile Include="Azure\IssueTypeCsvMapper.cs" />
+    <Compile Include="Azure\StatusCsvMapper.cs" />
+    <Compile Include="Azure\WorkItemImporter.cs" />
+    <Compile Include="Framework\DictionaryExtensions.cs" />
+    <Compile Include="Framework\DirectoryExtensions.cs" />
+    <Compile Include="Framework\EnumerableExtensions.cs" />
+    <Compile Include="Framework\FileInfoExtensions.cs" />
+    <Compile Include="Framework\Json\JTokenExtensions.cs" />
+    <Compile Include="Framework\Json\LongConverter.cs" />
+    <Compile Include="Framework\Json\TypedJsonConverter.cs" />
+    <Compile Include="Framework\NLog\DemystifyExceptionLayoutRenderer.cs" />
+    <Compile Include="Framework\Password.cs" />
+    <Compile Include="Framework\StringExtensions.cs" />
+    <Compile Include="Migrations\IssueMigration.cs" />
+    <Compile Include="IWorkspaceSettings.cs" />
+    <Compile Include="Jira\IssueId.cs" />
+    <Compile Include="Jira\JiraApi\CacheJiraApi.cs" />
+    <Compile Include="Jira\JiraApi\IJiraApi.cs" />
+    <Compile Include="Jira\JiraApi\IJiraApiSettings.cs" />
+    <Compile Include="Jira\JiraApi\IssueSource.cs" />
+    <Compile Include="Jira\JiraApi\IWritableJiraApi.cs" />
+    <Compile Include="Jira\JiraApi\JiraRestApiIssueIdEnumerator.cs" />
+    <Compile Include="Jira\JiraApi\LocalDirJiraApi.cs" />
+    <Compile Include="Jira\JiraApi\NullJiraApi.cs" />
+    <Compile Include="Jira\JiraApi\RestJiraApi.cs" />
+    <Compile Include="Jira\JiraContext.cs" />
+    <Compile Include="Jira\Json\IssueIdConverter.cs" />
+    <Compile Include="Jira\Model\Attachment.cs" />
+    <Compile Include="Jira\Model\Changelog.cs" />
+    <Compile Include="Jira\Model\Comment.cs" />
+    <Compile Include="Jira\Model\CommentCollection.cs" />
+    <Compile Include="Jira\Model\Creator.cs" />
+    <Compile Include="Jira\Model\History.cs" />
+    <Compile Include="Jira\Model\IPagedCollection.cs" />
+    <Compile Include="Jira\Model\Issue.cs" />
+    <Compile Include="Jira\Model\IssueFields.cs" />
+    <Compile Include="Jira\Model\IssueLink.cs" />
+    <Compile Include="Jira\Model\IssueType.cs" />
+    <Compile Include="Jira\Model\Item.cs" />
+    <Compile Include="Jira\Model\LinkedIssue.cs" />
+    <Compile Include="Jira\Model\LinkType.cs" />
+    <Compile Include="Jira\Model\Project.cs" />
+    <Compile Include="Jira\Model\ProjectId.cs" />
+    <Compile Include="Jira\Model\Scope.cs" />
+    <Compile Include="Jira\Model\Status.cs" />
+    <Compile Include="Jira\Model\StatusCategory.cs" />
+    <Compile Include="Jira\Model\StatusesByProject.cs" />
+    <Compile Include="Jira\Model\StatusesByType.cs" />
+    <Compile Include="Jira\Model\User.cs" />
+    <Compile Include="LocalDirs.cs" />
+    <Compile Include="MappingConstants.cs" />
+    <Compile Include="Migrations\MigrationMetaDataService.cs" />
+    <Compile Include="Migrations\MigrationRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Options.template.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="app.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Jira2AzureDevOps.Console\Jira2AzureDevOps.Console.csproj">
-      <Project>{013f3375-95cf-4a1e-82b0-f99fa2ac2ecd}</Project>
-      <Name>Jira2AzureDevOps.Console</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Jira2AzureDevOps.Logic\Jira2AzureDevOps.Logic.csproj">
-      <Project>{7a68a1d1-6465-4263-b4a4-2ec1cdd20adb}</Project>
-      <Name>Jira2AzureDevOps.Logic</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

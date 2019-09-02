@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("JiraAzureDevOpsTests")]
+[assembly: AssemblyTitle("Jira2AzureDevOps.Logic")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("JiraAzureDevOpsTests")]
+[assembly: AssemblyProduct("Jira2AzureDevOps.Logic")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d3c56fc6-a45e-4202-bfb1-6fd37fdec4e3")]
+[assembly: Guid("7a68a1d1-6465-4263-b4a4-2ec1cdd20adb")]
 
 // Version information for an assembly consists of the following four values:
 //

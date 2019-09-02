@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Jira2AzureDevOps;
-using Jira2AzureDevOps.Jira.Model;
+﻿using Jira2AzureDevOps.Logic;
+using Jira2AzureDevOps.Logic.Jira.Model;
 using NUnit.Framework;
 using Shouldly;
+using System.IO;
 
 namespace JiraAzureDevOpsTests
 {
     [TestFixture]
     public class LocalDirsTests
     {
-        private char _s = Path.DirectorySeparatorChar;
-        private Attachment _attachment = new Attachment {Id = 333, Filename = "lala.png"};
+        private readonly char _s = Path.DirectorySeparatorChar;
+        private readonly Attachment _attachment = new Attachment { Id = 333, Filename = "lala.png" };
 
         [Test]
         public void GetAttachmentIdFromPath_WorksForRelativePath()

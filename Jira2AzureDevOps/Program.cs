@@ -1,6 +1,7 @@
 ﻿using CommandDotNet;
-using Jira2AzureDevOps.Framework.CommandDotNet;
-using Jira2AzureDevOps.Framework.NLog;
+using Jira2AzureDevOps.Console;
+using Jira2AzureDevOps.Console.Framework;
+using Jira2AzureDevOps.Logic.Framework.NLog;
 using NLog;
 using System;
 using System.Threading.Tasks;
@@ -14,8 +15,8 @@ namespace Jira2AzureDevOps
         static void Main(string[] args)
         {
             DemystifyExceptionLayoutRenderer.Register();
-            
-            Console.CancelKeyPress += Console_CancelKeyPress;
+
+            System.Console.CancelKeyPress += Console_CancelKeyPress;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
@@ -24,6 +25,7 @@ namespace Jira2AzureDevOps
                 EnableDirectives = true,
                 Case = Case.KebabCase,
             })
+                .Configure(c => c.CancellationToken = Cancellation.Token)
                 .UseDebugDirective()
                 .UseParseDirective()
                 .UseResponseFiles()

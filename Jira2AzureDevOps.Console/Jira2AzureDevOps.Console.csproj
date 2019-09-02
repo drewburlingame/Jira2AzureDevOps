@@ -4,19 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A78CB14A-3E9A-4180-A584-D7BA9415C092}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Jira2AzureDevOps</RootNamespace>
-    <AssemblyName>Jira2AzureDevOps</AssemblyName>
+    <ProjectGuid>{013F3375-95CF-4A1E-82B0-F99FA2AC2ECD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Jira2AzureDevOps.Console</RootNamespace>
+    <AssemblyName>Jira2AzureDevOps.Console</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,7 +25,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -35,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Atlassian.Jira, Version=10.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Atlassian.SDK.10.6.0\lib\net452\Atlassian.Jira.dll</HintPath>
-    </Reference>
     <Reference Include="Ben.Demystifier, Version=0.1.0.0, Culture=neutral, PublicKeyToken=a6d206e05440431a, processorArchitecture=MSIL">
       <HintPath>..\packages\Ben.Demystifier.0.1.4\lib\net45\Ben.Demystifier.dll</HintPath>
     </Reference>
@@ -197,9 +192,6 @@
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.6.7\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=106.6.10.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.106.6.10\lib\net452\RestSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
@@ -274,7 +266,6 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
@@ -286,24 +277,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Azure\AdoApiSettings.cs" />
+    <Compile Include="App.cs" />
+    <Compile Include="Jira\ProjectFilter.cs" />
+    <Compile Include="Azure\AzureDevOpsApp.cs" />
+    <Compile Include="Framework\Cancellation.cs" />
+    <Compile Include="Framework\ConsoleEnumerator.cs" />
+    <Compile Include="Framework\DisableConsoleLoggingAttribute.cs" />
+    <Compile Include="Framework\DisableConsoleLoggingMiddleware.cs" />
+    <Compile Include="Framework\EtaCalculator.cs" />
+    <Compile Include="Framework\ISelfValidatingArgumentModel.cs" />
+    <Compile Include="Framework\LogHeaderMiddleware.cs" />
+    <Compile Include="Framework\NoHeadersAttribute.cs" />
+    <Compile Include="Framework\SelfValidatingArgumentsMiddleware.cs" />
+    <Compile Include="Framework\SetDefaultsFromConfigMiddleware.cs" />
+    <Compile Include="Azure\ImportOptions.cs" />
+    <Compile Include="Jira\JiraApiSettings.cs" />
+    <Compile Include="Jira\JiraApp.cs" />
+    <Compile Include="Jira\JiraExportCommands.cs" />
+    <Compile Include="Jira\JiraReportCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorkspaceSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Options.template.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jira2AzureDevOps.Console\Jira2AzureDevOps.Console.csproj">
-      <Project>{013f3375-95cf-4a1e-82b0-f99fa2ac2ecd}</Project>
-      <Name>Jira2AzureDevOps.Console</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Jira2AzureDevOps.Logic\Jira2AzureDevOps.Logic.csproj">
       <Project>{7a68a1d1-6465-4263-b4a4-2ec1cdd20adb}</Project>
       <Name>Jira2AzureDevOps.Logic</Name>
