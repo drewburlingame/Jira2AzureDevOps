@@ -108,12 +108,10 @@ namespace Jira2AzureDevOps.AzureDevOps
             workItem.Title = issue.Fields.Summary;
             workItem.Description = issue.Fields.Description;
 
-            
-
             workItem.State = _statusMapper.GetMappedValueOrThrow(migration);
 
-            workItem.Fields["System.CreatedDate"].Value = issue.ChangeLog.Histories.First().Created.UtcDateTime;
-            workItem.Fields["System.ChangedDate"].Value = issue.ChangeLog.Histories.Last().Created.UtcDateTime;
+            workItem.Fields["System.CreatedDate"].Value = issue.Fields.Created.UtcDateTime;
+            workItem.Fields["System.ChangedDate"].Value = issue.Fields.Updated.UtcDateTime;
 
             var comments = issue.Fields.Comment.Comments;
             if (comments.Any())

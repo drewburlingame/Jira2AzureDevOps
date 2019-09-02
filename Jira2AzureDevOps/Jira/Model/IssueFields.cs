@@ -1,10 +1,17 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Jira2AzureDevOps.Jira.Model
 {
     public class IssueFields
     {
+        [JsonProperty("created")]
+        public DateTimeOffset Created { get; set; }
+        
+        [JsonProperty("updated")]
+        public DateTimeOffset Updated { get; set; }
+
         [JsonProperty("issuetype")]
         public IssueType IssueType { get; set; }
         
