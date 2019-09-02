@@ -31,7 +31,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
             _localDirs = localDirs ?? throw new ArgumentNullException(nameof(localDirs));
             _cancellationToken = cancellationToken;
             _apiUrl = "/rest/api/2/";
-            _jiraClient = Atlassian.Jira.Jira.CreateRestClient(jiraApiSettings.JiraUrl, jiraApiSettings.JiraUsername, jiraApiSettings.JiraToken);
+            _jiraClient = Atlassian.Jira.Jira.CreateRestClient(jiraApiSettings.JiraUrl, jiraApiSettings.JiraUsername, jiraApiSettings.JiraToken.Value);
             _restClient = _jiraClient.RestClient;
         }
 

@@ -31,7 +31,6 @@ namespace Jira2AzureDevOps
                 .CommandsCanDisableConsoleLogging()
                 .UseBeginCommandHeaders(
                     Logger.Info,
-                    obscureArgument: a => a.CustomAttributes.IsDefined(typeof(PasswordAttribute), true),
                     skipCommand: ctx => ctx.ParseResult.TargetCommand.CustomAttributes.IsDefined(typeof(NoHeadersAttribute), false),
                     includeToolVersion: true,
                     includeDotNetVersion: true,

@@ -303,7 +303,7 @@
     <Compile Include="Framework\CommandDotNet\ISelfValidatingArgumentModel.cs" />
     <Compile Include="Framework\CommandDotNet\LogHeaderMiddleware.cs" />
     <Compile Include="Framework\CommandDotNet\NoHeadersAttribute.cs" />
-    <Compile Include="Framework\CommandDotNet\PasswordAttribute.cs" />
+    <Compile Include="Framework\CommandDotNet\Password.cs" />
     <Compile Include="Framework\DictionaryExtensions.cs" />
     <Compile Include="Framework\DirectoryExtensions.cs" />
     <Compile Include="Framework\CommandDotNet\DisableConsoleLoggingAttribute.cs" />

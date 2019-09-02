@@ -40,7 +40,7 @@ namespace Jira2AzureDevOps.AzureDevOps
             var accountUri = new Uri(_adoApiSettings.AdoUrl);
             _tfsCollection = new TfsTeamProjectCollection(
                 accountUri, 
-                new VssBasicCredential("", _adoApiSettings.AdoToken));
+                new VssBasicCredential("", _adoApiSettings.AdoToken.Value));
 
             Logger.Debug("Try connect to TFS {url}", accountUri);
 

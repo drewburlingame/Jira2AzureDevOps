@@ -7,9 +7,8 @@ namespace Jira2AzureDevOps.AzureDevOps
 {
     public class AdoApiSettings : ISelfValidatingArgumentModel
     {
-        [Password]
         [Option(Description = "Azure DevOps API Token")]
-        public string AdoToken { get; set; }
+        public Password AdoToken { get; set; }
 
         [Option(Description = "Azure DevOps URL")]
         public string AdoUrl { get; set; }
@@ -23,10 +22,10 @@ namespace Jira2AzureDevOps.AzureDevOps
 
         public IEnumerable<string> GetValidationErrors()
         {
-            if (AdoToken.IsNullOrEmpty()) yield return "ado-token is required";
-            if (AdoUrl.IsNullOrEmpty()) yield return "ado-url is required";
-            if (AdoProject.IsNullOrEmpty()) yield return "ado-project is required";
-            if (JiraIdField.IsNullOrEmpty()) yield return "jira-id-field is required";
+            if (AdoToken == null || AdoToken.Value.IsNullOrWhiteSpace()) yield return "ado-token is required";
+            if (AdoUrl.IsNullOrWhiteSpace()) yield return "ado-url is required";
+            if (AdoProject.IsNullOrWhiteSpace()) yield return "ado-project is required";
+            if (JiraIdField.IsNullOrWhiteSpace()) yield return "jira-id-field is required";
         }
     }
 }

@@ -10,9 +10,8 @@ namespace Jira2AzureDevOps.Jira.JiraApi
         [Option(Description = "Jira username")]
         public string JiraUsername { get; set; }
 
-        [Password]
         [Option(Description = "Jira API Token")]
-        public string JiraToken { get; set; }
+        public Password JiraToken { get; set; }
 
         [Option(Description = "Jira URL")]
         public string JiraUrl { get; set; }
@@ -35,7 +34,7 @@ namespace Jira2AzureDevOps.Jira.JiraApi
             else
             {
                 if (JiraUsername.IsNullOrWhiteSpace()) yield return "jira-username is required";
-                if (JiraToken.IsNullOrWhiteSpace()) yield return "jira-token is required";
+                if (JiraToken == null || JiraToken.Value.IsNullOrWhiteSpace()) yield return "jira-token is required";
                 if (JiraUrl.IsNullOrWhiteSpace()) yield return "ado-url is required";
             }
         }
