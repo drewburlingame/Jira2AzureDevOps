@@ -27,6 +27,7 @@ namespace Jira2AzureDevOps
                 .UseDebugDirective()
                 .UseParseDirective()
                 .UseResponseFiles()
+                .UseAppSettingsForOptionDefaults()
                 .UseSelfValidatingArgumentModels()
                 .CommandsCanDisableConsoleLogging()
                 .UseBeginCommandHeaders(

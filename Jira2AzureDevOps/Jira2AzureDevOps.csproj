@@ -42,7 +42,7 @@
       <HintPath>..\packages\Ben.Demystifier.0.1.4\lib\net45\Ben.Demystifier.dll</HintPath>
     </Reference>
     <Reference Include="CommandDotNet, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommandDotNet.3.0.0-preview2\lib\netstandard2.0\CommandDotNet.dll</HintPath>
+      <HintPath>..\packages\CommandDotNet.3.0.0-preview3\lib\netstandard2.0\CommandDotNet.dll</HintPath>
     </Reference>
     <Reference Include="FluentValidation, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentValidation.7.6.105\lib\net45\FluentValidation.dll</HintPath>
@@ -304,6 +304,7 @@
     <Compile Include="Framework\CommandDotNet\LogHeaderMiddleware.cs" />
     <Compile Include="Framework\CommandDotNet\NoHeadersAttribute.cs" />
     <Compile Include="Framework\CommandDotNet\Password.cs" />
+    <Compile Include="Framework\CommandDotNet\SetDefaultsFromConfigMiddleware.cs" />
     <Compile Include="Framework\DictionaryExtensions.cs" />
     <Compile Include="Framework\DirectoryExtensions.cs" />
     <Compile Include="Framework\CommandDotNet\DisableConsoleLoggingAttribute.cs" />
@@ -365,6 +366,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Options.template.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
