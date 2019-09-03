@@ -280,7 +280,7 @@
     <Compile Include="Azure\AdoApiSettings.cs" />
     <Compile Include="App.cs" />
     <Compile Include="Jira\ProjectFilter.cs" />
-    <Compile Include="Azure\AzureDevOpsApp.cs" />
+    <Compile Include="Azure\AzureImportCommands.cs" />
     <Compile Include="Framework\Cancellation.cs" />
     <Compile Include="Framework\ConsoleEnumerator.cs" />
     <Compile Include="Framework\DisableConsoleLoggingAttribute.cs" />

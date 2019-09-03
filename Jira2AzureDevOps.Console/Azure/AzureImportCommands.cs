@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Jira2AzureDevOps.Console.Azure
 {
     [Command(Name = "azure", Description = "Azure DevOps commands")]
-    public class AzureDevOpsApp
+    public class AzureImportCommands
     {
         private readonly IConsole _console;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -26,7 +26,7 @@ namespace Jira2AzureDevOps.Console.Azure
         private AdoContext _adoContext;
         private MigrationMetaDataService _migrationMetaDataService;
 
-        public AzureDevOpsApp(IConsole console)
+        public AzureImportCommands(IConsole console)
         {
             _console = console;
         }
@@ -54,22 +54,14 @@ namespace Jira2AzureDevOps.Console.Azure
             bool deleteFromAzure,
             List<IssueId> issueIds)
         {
-            issueIds.EnumerateOperation(issueIds.Count, issueId =>
+            issueIds.EnumerateOperation(issueIds.Count, "Reset Migration", issueId =>
             {
-                try
+                var migration = _migrationRepository.Get(issueId);
+                if (deleteFromAzure)
                 {
-                    var migration = _migrationRepository.Get(issueId);
-                    if (deleteFromAzure)
-                    {
-                        _adoContext.Api.Delete(migration);
-                    }
-                    _migrationRepository.Reset(migration);
-                    Logger.Info("Reset migration for {issueId}", issueId);
+                    _adoContext.Api.Delete(migration);
                 }
-                catch (Exception e)
-                {
-                    Logger.Error(e, "Failed to reset {issueId}", issueId);
-                }
+                _migrationRepository.Reset(migration);
             });
         }
 
@@ -158,44 +150,35 @@ namespace Jira2AzureDevOps.Console.Azure
                 statusMapper, issueTypeCsvMapper);
 
             int imported = 0;
-            int errored = 0;
 
-            var localAccessFailFile = failFile;
-            issueMigrations.EnumerateOperation(totalCount, migration =>
-            {
-                if (migration.ImportComplete)
+            var state = new ConsoleEnumerator.State(totalCount);
+            issueMigrations.EnumerateOperation(
+                state,
+                "Import Issue",
+                migration => migration.IssueId,
+                failFile,
+                migration =>
                 {
-                    if (force)
-                    {
-                        Logger.Debug("Forcing import for already imported migration {issueId}", migration.IssueId);
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
 
-                try
-                {
+                    if (migration.ImportComplete)
+                    {
+                        if (force)
+                        {
+                            Logger.Debug("Forcing import for already imported migration {issueId}", migration.IssueId);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
                     if (importer.TryImport(migration))
                     {
                         imported++;
                     }
-                }
-                catch (Exception e)
-                {
-                    errored++;
-                    localAccessFailFile?.AppendAllLines(migration.IssueId.ToString().ToEnumerable());
-                    Logger.Error(e, "Failed to import {issueId}", migration.IssueId);
-                }
-            });
+                });
 
-            if (errored == 0)
-            {
-                failFile = null;
-            }
-
-            Logger.Info(new { imported, errored, failFile });
+            Logger.Info(new { imported });
         }
     }
 }
