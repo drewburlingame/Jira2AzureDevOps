@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Jira
 {
-    [Command(Name = "report", Description = "Commands to summarize Jira data to aid in creating mapping files and strategies")]
+    [Command(Name = "report", Description = "Commands to summarize Jira data to aid in creating mapping files")]
     public class JiraReportCommands
     {
         private readonly IConsole _console;
@@ -35,7 +35,7 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         [DisableConsoleLogging]
-        [Command(Description = "prints all exported project keys")]
+        [Command(Description = "prints all exported project keys and the count of exported issues for each")]
         public void ExportedProjects()
         {
             var projects = _jiraContext.LocalJiraApi.ExportedProjectKeys().ToList();
@@ -48,7 +48,8 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         [DisableConsoleLogging]
-        [Command(Description = "generates mapping records in csv format to kick start the mapping process")]
+        [Command(Description = "generates mapping records in csv format to kick start the mapping process. " +
+                               "run with '> {filename}.csv' to pipe the output to a mapping file")]
         public void StubStatusMapping(
             ProjectFilter projectFilter,
             [Option(ShortName = "H", LongName = "print-headers")]
@@ -108,7 +109,8 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         [DisableConsoleLogging]
-        [Command(Description = "generates mapping records in csv format to kick start the mapping process")]
+        [Command(Description = "generates mapping records in csv format to kick start the mapping process. " +
+                               "run with '> {filename}.csv' to pipe the output to a mapping file")]
         public void StubIssueTypesMapping(
             ProjectFilter projectFilter,
             [Option(ShortName = "H", LongName = "print-headers")]
