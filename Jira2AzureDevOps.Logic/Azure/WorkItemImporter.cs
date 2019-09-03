@@ -27,6 +27,8 @@ namespace Jira2AzureDevOps.Logic.Azure
         public WorkItemImporter(bool force, MigrationRepository migrationRepository, AdoContext adoContext,
             JiraContext jiraContext, StatusCsvMapper statusMapper, IssueTypeCsvMapper issueTypeCsvMapper)
         {
+            // TODO: interface for the mappers to alternate mapping strategies
+
             _force = force;
             _migrationRepository = migrationRepository ?? throw new ArgumentNullException(nameof(migrationRepository));
             _adoContext = adoContext ?? throw new ArgumentNullException(nameof(adoContext));
@@ -74,8 +76,7 @@ namespace Jira2AzureDevOps.Logic.Azure
                 }
                 else
                 {
-                    // TODO: resume migration from last stopping point
-                    throw new Exception($"Skipping issue {migration.IssueId} for existing {migration.IssueType}.  TODO: resume migration");
+                    throw new Exception($"Issue {migration.IssueId} already imported for existing {migration.IssueType}.  TODO: resume migration from last stopping point");
                 }
             }
 
@@ -132,7 +133,6 @@ namespace Jira2AzureDevOps.Logic.Azure
                 workItem.Description = sb.ToString();
             }
 
-
             foreach (var attachmentMigration in migration.Attachments)
             {
                 var fullPath = _jiraContext.LocalDirs.GetFullPath(attachmentMigration.File);
@@ -154,7 +154,7 @@ namespace Jira2AzureDevOps.Logic.Azure
             }
             catch (WorkItemTypeDeniedOrNotExistException)
             {
-                //ignore the exception will be logged below
+                //swallow exception. the null value will be handled
                 workItemType = null;
             }
 

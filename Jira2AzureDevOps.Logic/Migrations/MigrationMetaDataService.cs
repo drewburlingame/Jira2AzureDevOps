@@ -96,13 +96,13 @@ namespace Jira2AzureDevOps.Logic.Migrations
 
         private void AlertIfPartialPagedData(IssueId issueId, JToken issueData)
         {
+            // TODO: load additional data in RestJiraApi.GetIssue when necessary and remove this method
             issueData.WalkNode(o =>
             {
                 if (o.TryGetJiraPageCounts(out int maxResults, out int total))
                 {
                     if (o.Path == "changelog" || o.Path.EndsWith(".worklog", StringComparison.OrdinalIgnoreCase))
                     {
-                        // TODO: when we import history, log as Error
                         Logger.Debug("Pages are missing for {issueId} {page}", issueId,
                             new { o.Path, maxResults, total });
                     }

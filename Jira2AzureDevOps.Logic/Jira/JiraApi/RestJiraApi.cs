@@ -47,6 +47,7 @@ namespace Jira2AzureDevOps.Logic.Jira.JiraApi
 
         public async Task<JObject> GetIssue(IssueId issueId)
         {
+            // TODO: check the page properties for comments and changelogs. Fetch and merge remaining pages when available.
             Logger.Debug("Fetching issue {issueId}", issueId);
             var url = $"{_apiUrl}/issue/{issueId}?fields=*all&expand=changelog,renderedFields";
             return (JObject)await _restClient.ExecuteRequestAsync(Method.GET, url, token: _cancellationToken).ConfigureAwait(false);

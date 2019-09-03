@@ -1,131 +1,116 @@
 ﻿
 # Purpose
 
-* Export all issues and attachments from Jira
-  * Filter by project(s) or issue(s)
-  * downloaded to a local directory
-    * for use as a cache and for --jira-offline mode
-    * can be archived for historical reference
-* Export meta-data that would be useful for preparing the mappings into Azure DevOps
-* Import selected issues to Azure DevOps
-  * converting
-    * Issue Types
-    * States
-* Extensible design to enable any mapping strategy
-  * including use of external data
-* Dev & debug helpers
-  * RSP files
-  * Debug Directive (see Debugging section below)
-  * Supplied arguments logged with each command
-  * NLog for structured logging and to take advantage of that ecosystem of appenders without lock-in.  Some options include:
-    * https://github.com/microsoft/ApplicationInsights-dotnet-logging 
-    * https://github.com/aws/aws-logging-dotnet
-    * https://docs.datadoghq.com/logs/log_collection/csharp/?tab=nlog
-    * https://github.com/Appdynamics/AppDynamics.DEXTER/blob/master/NLog.config
-    * https://nlog-project.org/config/
-
-## Features
-
-* Exports from Jira
-  * Issues
-  * Metadata
-  * Attachments
-* Cached to local directory
-  * can be archived for historical purposes
-  * export can be rerun and cached items will not be downloaded again unless `--force` option is specified.
-    * this makes it less costly to recover from errors.
-  * can be used for offline mode after all data is exported
-  * allows re-importing for failures
-* Imports Issues to Azure DevOps
-  * tracks imported items and allows resume after 
-  * adds label = "imported-from-jira" 
-
+* Migrate issues from Jira into Azure DevOps as work items
+* Cache Jira data to a local directory for archiving and replay
+* Provide idempotent replay of both import and export
+* Tools to simplify mapping status & issue types
+* Tools for quick troubleshooting and resolution of errors (see [development](development.md))
+* 
 ## Prerequisites
 
 * Jira account w/ API token
 * Azure DevOps account w/ API token
 * Existing Azure DevOps project configured with target work item types and states.
 
+## Features
 
-### Commands
+#### Export from Jira
 
-* __jira__
-  * __export__
-    * __issues-by-id__ export the given issue(s) by id
-    * __issues-by-project__ export all issues for the given project(s)
-    * __metadata__ export organization level metadata 
-      * Projects
-      * Issue Fields
-      * Issue Linke Types
-      * Issue Priorities
-      * Issue Resolutions
-      * Issue Statuses
-      * Issue Types
-      * Labels
-  * __summarize__
-    * __issue-types__ prints a list of issue types grouped by project
-    * __status__ prints all statuses grouped by project, issue type and then category
+* Issues
+  * History
+  * Comment
+  * Attachments
+* Organizational metadata
+  * Projects
+  * Issue Fields
+  * Issue Link Types
+  * Priorities
+  * Issue Resolutions
+  * Issue Types
+  * Labels
+  * Statuses
+
+Exported data is cached to the working directory _(see more below)_ which can be archived. 
+If in a month it's discovered other fields need to be imported or additional issues need to be imported, the code or mapping files can be modified and the process can be run again.  
+You don't have to "get it right" the first time. This iterative import makes it easier to get data in the system quickly and update later if/as needed.
+
+#### Import to Azure DevOps
+
+Import Work Items. An export does not have to be completed first. When an Import queries directly from Jira, an export occurs as a by-product of the caching.
+
+## Configuration options
+
+### Working directory
+
+Working directory can be set with option `-W` or `--workspace` and defaults to the directory the commands are run in..
+
+### Setting credentials
+
+Credentials are provided as options for commands that use them (`--jira-username`, `--jira-token`, `--jira-url`, `--ado-token` ,`--ado-url`).
+
+Defaults for all options can be provided via an `Options.config` file.  See `Options.template.config` for the format.  You can specify credentials options here to avoid showing them elsewhere.  Tokens will be output as "*****" by help and logging.
+
+> Note: Options.config will only work for command options and not for command operands (aka "arguments" in help documentation).  See [Using response files] as an alternative for argument configurations.
+
+### Using response files
+
+Response files allow grouping arguments in a file and using them by passing the file as an argument.  For example, `jira export issues-by-id` takes a list of issue ids.  If you created a file `issues_ids.rsp` containing a list of issue ids, you could execute the command using that file like this 
+
+`Jira2AzureDevOps.exe jira export issues-by-id @issueids.rsp`
+
+The console app recognizes the `@` and then expands the rsp file, putting the args in where the rsp file was.  Any file path can be used after the `@`.  i.e.  @c:\my-rsp-files\test-issues.rsp
+
+To see how this works, you can use the [CommandDotNet](https://github.com/bilal-fazlani/commanddotnet) Parse directive to see how the rsp file is converted.  Simply include `[parse]` as the first argument to the exe (before any commands)
+
+`Jira2AzureDevOps.exe [parse] jira export issues-by-id @issueids.rsp`
+
+## Commands
+
+* `azure`
+  * `import-all` imports all issues for the given Jira project(s)
+  * `import-by-id` imports the given issue(s)
+  * `reset-import-status` resets the import status for the given issue(s)
+* `jira`
+  * `export`
+    * `issues-by-id` export the given issue(s) by id
+    * `issues-by-project` export all issues for the given project(s)
+    * `metadata` export organization level metadata
+  * `report`
+    * `exported-projects` prints all exports projects keys with a count of issues per project
+    * `stub-issue-types-mapping` generates mapping records in csv format
+    * `stub-status-mapping` generates mapping records in csv format
 	
 ## List of WorkItem fields
 
 https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.1
 
-summarized at [workItemFieldList.json](workItemFieldList.json)
+summarized at [workItemFieldList.json](workItemFieldList.json) and [workItemFieldList.csv](workItemFieldList.csv)
+
+## Working Directory
+
+The working directory will generate the following folders:
+
+* jira-cache
+  * attachments
+  * issues
+  * meta
+* logs
+
+archive jira-cache when completed.
+
+## Caveats & remaining work
+
+* Almost no test automation exists. There was little time to complete this while I had access to both Jira and AzureDevops for the migration project.
+* Comments and Changelog are fetched with the Issue instead of separately. This can lead to cases where either are truncated because Jira returns only a single page for each.  The count in the responses should be checked and remaining pages downloaded if you need to import them.  The app will contain logs starting with `Pages are missing` if this occurs.
+* Comments are appended to the end of the description of each issues.
+* Changelogs (History) are not imported
+* Links to other issues are not imported and linked items are not imported solely by virtue of being a linked item.
+* Azure Devops does not know how to interpret Markdown so Jira issues using markdown are not well formatted
+* Export and import can be specified Jira issues or projects. If projects is specified, all issues within that project are queried. That worked fine for my project.  If you need more specificity, you'll need to create additional commands and method in the IJiraApi.  A good candidate would be an operation that takes a JQL query to filter items.
+
+I will accept pull requests if you'd like to contribute back to the system.
 
 
-## Caveates
 
-This was a low-budget implementation and so many normal steps to harden the app have not been implemented.
-The goal was to build something that could be iterated on by other developers.  Pull requests are encouraged.
 
-* No automated testing.  It has all been manually tested.  Tests will come if time allows.
-* Errors during export will crash the program.  Export is idempotent so it can be restarted.
-  * I'd like to add files to skip issues with errors an option to load that file for `export issues-by-id`
-            
-
-### local dev
-
-bash alias
-
-> function jira2ado() { ~/src/drew/Jira2AzureDevOps/Jira2AzureDevOps/bin/Debug/Jira2AzureDevOps.exe $@; }
-
-cmd alias via `aliases.bat`
-
-> jira2ado=%USERPROFILE%\src\drew\Jira2AzureDevOps\Jira2AzureDevOps\bin\Debug\Jira2AzureDevOps.exe $*
-
-Working dir 
-
-* c:/tmp/jira2ado - run jira2ado commands from here
-* c:/tmp/jira2ado/jira-settings.rsp
-  * contains jira auth tokens and jira url
-  * after all jira items are downloaded, includes the --offline flag so I don't query Jira again
-  * commented out lines of other arguments that I may want to test.  see below.
-
-From the working dir, the program is executed as
-
-``` cmd
-jira2ado jira export @jira-settings.rsp issues-by-project
-```
-
-jira-settings.rsp contains
-
-``` cmd
---jira-username **** --jira-token **** --jira-url https://company-slug.atlassian.net
-#--jira-offline
-```
-
-ado-settings.rsp contains
-
-``` cmd
---ado-token **** --ado-url https://dev.azure.com/company-slug --jira-offline
-```
-
-`--jira-offline` if all your issues are already downloaded.  Use other issues to stream directly from Jira (caching still occurs)
-
-#### Debugging
-
-_CommandDotNet_ includes a useful feature for debugging called a [Debug Directive](https://github.com/dotnet/command-line-api/wiki/Features-overview#debugging) initially created by the System.CommandLine project.
-By specifying `[debug]` as the first argument, you'll be prompted to attach a debugger to the current process.
-
-> $ jira2ado [debug] jira export issues-by-id
-> Attach your debugger to process 18640 (dotnet).
