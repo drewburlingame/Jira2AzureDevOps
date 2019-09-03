@@ -32,9 +32,9 @@ namespace Jira2AzureDevOps
                 .UseAppSettingsForOptionDefaults()
                 .UseSelfValidatingArgumentModels()
                 .CommandsCanDisableConsoleLogging()
-                .UseBeginCommandHeaders(
+                .UseReproHeaders(
                     Logger.Info,
-                    skipCommand: ctx => ctx.ParseResult.TargetCommand.CustomAttributes.IsDefined(typeof(NoHeadersAttribute), false),
+                    skipCommand: ctx => ctx.ParseResult.TargetCommand.CustomAttributes.IsDefined(typeof(NoReproHeadersAttribute), false),
                     includeToolVersion: true,
                     includeDotNetVersion: true,
                     includeOsVersion: true,

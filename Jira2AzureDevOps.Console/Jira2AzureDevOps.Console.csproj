@@ -287,8 +287,8 @@
     <Compile Include="Framework\DisableConsoleLoggingMiddleware.cs" />
     <Compile Include="Framework\EtaCalculator.cs" />
     <Compile Include="Framework\ISelfValidatingArgumentModel.cs" />
-    <Compile Include="Framework\LogHeaderMiddleware.cs" />
-    <Compile Include="Framework\NoHeadersAttribute.cs" />
+    <Compile Include="Framework\NoReproHeadersAttribute.cs" />
+    <Compile Include="Framework\ReproHeadersMiddleware.cs" />
     <Compile Include="Framework\SelfValidatingArgumentsMiddleware.cs" />
     <Compile Include="Framework\SetDefaultsFromConfigMiddleware.cs" />
     <Compile Include="Azure\ImportOptions.cs" />

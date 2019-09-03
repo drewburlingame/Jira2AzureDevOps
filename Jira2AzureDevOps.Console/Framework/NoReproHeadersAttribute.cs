@@ -3,5 +3,5 @@
 namespace Jira2AzureDevOps.Console.Framework
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class NoHeadersAttribute : Attribute { }
+    public class NoReproHeadersAttribute : Attribute { }
 }

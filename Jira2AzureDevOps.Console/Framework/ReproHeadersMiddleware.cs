@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Framework
 {
-    public static class LogHeaderMiddleware
+    public static class ReproHeadersMiddleware
     {
-        public static AppRunner UseBeginCommandHeaders(this AppRunner appRunner,
+        public static AppRunner UseReproHeaders(this AppRunner appRunner,
             Action<string> writer = null,
             Predicate<CommandContext> skipCommand = null,
             Predicate<IArgument> skipArgument = null,
