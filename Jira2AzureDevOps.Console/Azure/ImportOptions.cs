@@ -18,7 +18,7 @@ namespace Jira2AzureDevOps.Console.Azure
         public FileInfo StatusMappingFile { get; set; }
 
         [Option(Description = "The ids of all issues that fail to import will be written to this " +
-                              "file which can be used as input for the import-by-id command")]
+                              "file which can be used as @response-file input for the import-by-id command")]
         public FileInfo FailFile { get; set; }
     }
 }

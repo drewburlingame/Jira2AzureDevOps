@@ -1,7 +1,6 @@
 ﻿using CommandDotNet;
 using CommandDotNet.Rendering;
 using Jira2AzureDevOps.Console.Framework;
-using Jira2AzureDevOps.Logic.Framework;
 using Jira2AzureDevOps.Logic.Jira;
 using Jira2AzureDevOps.Logic.Jira.JiraApi;
 using Jira2AzureDevOps.Logic.Migrations;
@@ -76,13 +75,14 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         [Command(Description = "Exports issues for the given id(s)")]
-        public void IssuesById(List<IssueId> issueIds)
+        public void IssuesById(ExportOptions exportOptions, List<IssueId> issueIds)
         {
-            issueIds.EnumerateOperation(issueIds.Count, ExportIssue);
+            issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, ExportIssue);
         }
 
         [Command(Description = "Exports issues for the given project(s)")]
         public void IssuesByProject(
+            ExportOptions exportOptions,
             ProjectFilter projectFilter,
             [Option(Description = "Resumes export after this issue")]
             IssueId resumeAfter,
@@ -102,8 +102,7 @@ namespace Jira2AzureDevOps.Console.Jira
             }
 
             var issueIds = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter);
-            Logger.Info("Total issue count {totalIssueCount} for {projects}", totalCount, projectFilter.Projects.ToOrderedCsv());
-            issueIds.EnumerateOperation(totalCount, ExportIssue);
+            issueIds.EnumerateOperation(totalCount, "Export Issue", exportOptions.FailFile, ExportIssue);
         }
 
         private void ExportIssue(IssueId issueId)
