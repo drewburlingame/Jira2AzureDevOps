@@ -9,8 +9,7 @@ namespace Jira2AzureDevOps.Console.Jira
     {
         [Option(ShortName = "P", LongName = "projects",
             Description = "If provided, the operation is applied to only these projects")]
-        public List<string> Projects { get; set; } = new List<string>
-            {"APP", "ARCH", "BI", "BILL", "DEVOPS", "GN", "MS", "QA"};
+        public List<string> Projects { get; set; }
 
         private HashSet<string> _projects;
 
