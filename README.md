@@ -15,7 +15,7 @@
 
 ## Features
 
-see the list of commands [here](commands.md)
+see the list of commands [here](commands.md).  Defaults for command options can be overridden with the `Options.config` file as described in [Setting credentials](#Setting-credentials) below.
 
 #### Export from Jira
 
@@ -33,14 +33,24 @@ Commands located under command: `import`
 Import issues by project or by id. 
 An export does not have to be completed first. When an Import queries directly from Jira, an export occurs as a by-product of the caching.
 
-#### Reports for Jira data
+##### Mapping files
 
-Commands located under command: `report`
+Issue Type and Status mapping files are CSV files where the left columns form the key and the right column the target value.
 
+###### Issue Type mappings
+the key columns can include the project and issue type.  
+If only one column exists, then only that column is used to generate the key.  
+For example, if only the issue type column was specified, then issues would be mapped based on type alone, regardless of project.  
+This allows mappings to be specified across projects.
 
-TODO: 
-* describe mapping files
-* walkthrough.md to walkthrough a migration
+use `report stub-issue-types-mapping [options] > issue-type-mapping.csv` to generate the csv file and then add the mapped value in the `Work Item Type` column.
+
+###### Status mappings
+the key columns can include the project, issue type, status category and status.
+If only the status category column exists, then all issues in a status category will be mapped the given status.
+If only the issue type and status category column exists, then all issues of a type and status category will be mapped the given status.
+
+use `report stub-status-mapping [options] > status-mapping.csv` to generate the csv file and then add the mapped value in the `Work Item Status` column.
 
 ## Configuration options
 
@@ -106,7 +116,7 @@ I started the migration with [Solidify's Jira to Azure DevOps migrator](https://
 It did most of what I needed but there were a few things missing:
 * Comments weren't migrated
 * Data exported from Jira was modified before being persisted to disk. I wanted raw data for historical reference and to play with the mappings without the need to download from Jira again.
-* I needed to report on existing data to understand what fields, status & types were actually used vs theoretically possible. 
+* I needed to report on existing data to understand what fields, status & types were actually used vs theoretically possible. We had a lot of obsolete issue types and statuses in our system and creating the mappings were cumbersome.
   * I initially added these to the tool but found the process of creating and troubleshooting less convenient without CommandDotNet.
 * Custom logging framework forced use of MS telemetrics and didn't support structured logging or log file management, like rolling logs.
   * I used NLog, with settings to match their defaults.
