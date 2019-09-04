@@ -4,9 +4,9 @@
     {
         public string Value { get; }
 
-        public Password(string value)
+        public Password(string password)
         {
-            Value = value;
+            Value = password;
         }
 
         public override string ToString()

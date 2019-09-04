@@ -52,6 +52,7 @@ namespace Jira2AzureDevOps.Console.Azure
         public void ResetImportStatus(
             [Option(ShortName = "d", LongName = "delete-from-azure", Description = "Removes the work item(s) from Azure DevOps")]
             bool deleteFromAzure,
+            [Operand(Description = "The Jira issue id(s) of the migrations to reset")]
             List<IssueId> issueIds)
         {
             issueIds.EnumerateOperation(issueIds.Count, "Reset Migration", issueId =>
@@ -75,7 +76,10 @@ namespace Jira2AzureDevOps.Console.Azure
         }
 
         [Command(Description = "Imports the given issue(s) to Azure DevOps")]
-        public void ImportById(ImportOptions importOptions, List<IssueId> issueIds)
+        public void ImportById(
+            ImportOptions importOptions,
+            [Operand(Description = "The Jira issue id(s) to import (space delimited).  Alternatively, specify a @fail-file-path to import issues that failed in a previous import.")]
+            List<IssueId> issueIds)
         {
             if (issueIds.IsNullOrEmpty())
             {

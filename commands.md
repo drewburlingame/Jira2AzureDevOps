@@ -47,10 +47,10 @@ Commands to export issues and metadata
 |--jira-batch-size|Number||100||Batch size used in search api|
 |--jira-force|||||Always fetched data from the API and overwrite local cache|
 |--jira-offline|||||Uses only local cache and does not query Jira.|
-|--jira-token|value||||Jira API Token|
+|--jira-token|password||||Jira API Token|
 |--jira-url|Text||||Jira URL|
 |--jira-username|Text||||Jira username|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Subcommands
 |Name|Description|
@@ -72,7 +72,7 @@ exports a subset of Jira metadata
 #### Options
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Notes
 
@@ -90,13 +90,13 @@ Exports issues for the given id(s)
 #### Arguments
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
-|issue-ids|key|true||||
+|issue-ids|key|true|||The Jira issue id(s) to export (space delimited).  Alternatively, specify a @fail-file-path to export issues that failed in a previous export.|
 
 #### Options
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
 |--fail-file|fileName||||The ids of all issues that fail to export will be written to this file which can be used as @response-file input for the export commands|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Notes
 
@@ -118,7 +118,7 @@ Exports issues for the given project(s)
 |--issue-list-source|IssueSource|||Jira,Cache,Both|Specify if the issue list should come from Jira, Cache or Both. Use Jira when there are unknown updates. Use Cache for speed when you only need to updates.|
 |-P, --projects|Text|true|||If provided, the operation is applied to only these projects|
 |--resume-after|key||||Resumes export after this issue|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Notes
 
@@ -139,10 +139,10 @@ Commands to summarize Jira data to aid in creating mapping files
 |--jira-batch-size|Number||100||Batch size used in search api|
 |--jira-force|||||Always fetched data from the API and overwrite local cache|
 |--jira-offline|||||Uses only local cache and does not query Jira.|
-|--jira-token|value||||Jira API Token|
+|--jira-token|password||||Jira API Token|
 |--jira-url|Text||||Jira URL|
 |--jira-username|Text||||Jira username|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Subcommands
 |Name|Description|
@@ -164,7 +164,7 @@ prints all exported project keys and the count of exported issues for each
 #### Options
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 
 ---
@@ -187,7 +187,7 @@ generates mapping records in csv format to kick start the mapping process. run w
 |-p, --print-project|||False|||
 |-s, --print-status|||False|||
 |-P, --projects|Text|true|||If provided, the operation is applied to only these projects|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 
 ---
@@ -209,7 +209,7 @@ generates mapping records in csv format to kick start the mapping process. run w
 |-t, --print-issue-type|||False|||
 |-p, --print-project|||False|||
 |-P, --projects|Text|true|||If provided, the operation is applied to only these projects|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 
 ---
@@ -225,16 +225,16 @@ Azure DevOps commands
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
 |--ado-project|Text||||The project to import into|
-|--ado-token|value||||Azure DevOps API Token|
+|--ado-token|password||||Azure DevOps API Token|
 |--ado-url|Text||||Azure DevOps URL|
 |--jira-batch-size|Number||100||Batch size used in search api|
 |--jira-force|||||Always fetched data from the API and overwrite local cache|
 |--jira-id-field|Text||JiraId||Code of the field used to store original Id. \{ProcessName\}.\{FieldName\}|
 |--jira-offline|||||Uses only local cache and does not query Jira.|
-|--jira-token|value||||Jira API Token|
+|--jira-token|password||||Jira API Token|
 |--jira-url|Text||||Jira URL|
 |--jira-username|Text||||Jira username|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 #### Subcommands
 |Name|Description|
@@ -256,13 +256,13 @@ Resets the import status for the given issue(s)
 #### Arguments
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
-|issue-ids|key|true||||
+|issue-ids|key|true|||The Jira issue id(s) of the migrations to reset|
 
 #### Options
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
 |-d, --delete-from-azure|||||Removes the work item(s) from Azure DevOps|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 
 ---
@@ -282,7 +282,7 @@ Imports the issues for the given Jira project(s) to Azure DevOps
 |-t, --issue-type-mappings|fileName||||CSV file containing mappings from Jira issue types to Azure DevOps issue types|
 |-P, --projects|Text|true|||If provided, the operation is applied to only these projects|
 |-s, --status-mappings|fileName||||CSV file containing mappings from Jira statuses to Azure DevOps statuses|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 
 ---
@@ -297,7 +297,7 @@ Imports the given issue(s) to Azure DevOps
 #### Arguments
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
-|issue-ids|key|true||||
+|issue-ids|key|true|||The Jira issue id(s) to import (space delimited).  Alternatively, specify a @fail-file-path to import issues that failed in a previous import.|
 
 #### Options
 |Name|Type|List|Default|Allowed|Description|
@@ -306,6 +306,6 @@ Imports the given issue(s) to Azure DevOps
 |-f, --force|||||if the item has already been imported, it will be deleted and reimported.|
 |-t, --issue-type-mappings|fileName||||CSV file containing mappings from Jira issue types to Azure DevOps issue types|
 |-s, --status-mappings|fileName||||CSV file containing mappings from Jira statuses to Azure DevOps statuses|
-|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where api responses and file downloads are stored.|
+|-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|
 
 

@@ -78,7 +78,10 @@ namespace Jira2AzureDevOps.Console.Jira
         [Command(Description = "Exports issues for the given id(s)",
             ExtendedHelpText = "Export included history, comments & attachments for each issue. " +
                                "Only the first page of history and comments are currently exported.")]
-        public void IssuesById(ExportOptions exportOptions, List<IssueId> issueIds)
+        public void IssuesById(
+            ExportOptions exportOptions,
+            [Operand(Description = "The Jira issue id(s) to export (space delimited).  Alternatively, specify a @fail-file-path to export issues that failed in a previous export.")]
+            List<IssueId> issueIds)
         {
             issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, ExportIssue);
         }

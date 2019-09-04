@@ -27,6 +27,8 @@ The same business logic could be hosted in both types of app and the console can
 The working directory serves as the local data store for a migration.  A migration file is stored for each migration to track it's import status.
 
 Export & Import use the same IJiraApi stack. Export is a by-produce of the `CachedJiraApi` using `LocalDirJiraApi`. Due to this design, Import also performs an Export for issues that aren't already exported.  This ensures all issues in the cache and available for archive.
+
+C# classes were created for Json deserialization.  I used [QuickType](https://app.quicktype.io/#l=cs&r=json2csharp) to generate the classes from json data with some tweaks afterward.  The classes do not contain a comprehensive list of every field.  They contain what I needed for the project and extra where I didn't remove the unused properties.  Enhance these objects if you need to import more fields.  I found this approach useful for interrogating the data.
  
 #### RSP files
 described in the [README.md](README.md)
