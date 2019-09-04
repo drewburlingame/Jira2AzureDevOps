@@ -7,9 +7,12 @@ namespace Jira2AzureDevOps.Console
     public class App
     {
         [SubCommand]
-        public JiraApp JiraApp { get; set; }
+        public JiraExportCommands JiraExportCommands { get; set; }
 
         [SubCommand]
         public AzureImportCommands AzureImportCommands { get; set; }
+
+        [SubCommand]
+        public JiraReportCommands JiraReportCommands { get; set; }
     }
 }

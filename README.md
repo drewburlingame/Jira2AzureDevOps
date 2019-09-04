@@ -19,13 +19,24 @@ see the list of commands [here](commands.md)
 
 #### Export from Jira
 
+Commands located under command: `export`
+
+Export issues by project or id. 
 Exported data is cached to the working directory _(see more below)_ which can be archived. 
 If in a month it's discovered other fields need to be imported or additional issues need to be imported, the code or mapping files can be modified and the process can be run again.  
 You don't have to "get it right" the first time. This iterative import makes it easier to get data in the system quickly and update later if/as needed.
 
 #### Import to Azure DevOps
 
-Import Work Items. An export does not have to be completed first. When an Import queries directly from Jira, an export occurs as a by-product of the caching.
+Commands located under command: `import`
+
+Import issues by project or by id. 
+An export does not have to be completed first. When an Import queries directly from Jira, an export occurs as a by-product of the caching.
+
+#### Reports for Jira data
+
+Commands located under command: `report`
+
 
 TODO: 
 * describe mapping files
@@ -47,15 +58,15 @@ Defaults for all options can be provided via an `Options.config` file.  See `Opt
 
 #### Using response files
 
-Response files allow grouping arguments in a file and using them by passing the file as an argument.  For example, `jira export issues-by-id` takes a list of issue ids.  If you created a file `issues_ids.rsp` containing a list of issue ids, you could execute the command using that file like this 
+Response files allow grouping arguments in a file and using them by passing the file as an argument.  For example, `export issues-by-id` takes a list of issue ids.  If you created a file `issues_ids.rsp` containing a list of issue ids, you could execute the command using that file like this 
 
-`Jira2AzureDevOps.exe jira export issues-by-id @issueids.rsp`
+`Jira2AzureDevOps.exe export issues-by-id @issueids.rsp`
 
 The console app recognizes the `@` and then expands the rsp file, putting the args in where the rsp file was.  Any file path can be used after the `@`.  i.e.  @c:\my-rsp-files\test-issues.rsp
 
 To see how this works, you can use the [CommandDotNet](https://github.com/bilal-fazlani/commanddotnet) Parse directive to see how the rsp file is converted.  Simply include `[parse]` as the first argument to the exe (before any commands)
 
-`Jira2AzureDevOps.exe [parse] jira export issues-by-id @issueids.rsp`
+`Jira2AzureDevOps.exe [parse] export issues-by-id @issueids.rsp`
 	
 ## List of WorkItem fields
 

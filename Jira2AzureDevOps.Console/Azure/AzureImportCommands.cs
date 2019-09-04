@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Azure
 {
-    [Command(Name = "azure", Description = "Azure DevOps commands")]
+    [Command(Name = "import", Description = "Commands to import issues. Options listed are for all import subcommands.")]
     public class AzureImportCommands
     {
         private readonly IConsole _console;
@@ -49,10 +49,10 @@ namespace Jira2AzureDevOps.Console.Azure
         }
 
         [Command(Description = "Resets the import status for the given issue(s)")]
-        public void ResetImportStatus(
+        public void Reset(
             [Option(ShortName = "d", LongName = "delete-from-azure", Description = "Removes the work item(s) from Azure DevOps")]
             bool deleteFromAzure,
-            [Operand(Description = "The Jira issue id(s) of the migrations to reset")]
+            [Operand(Description = "The Jira issue id(s) of the migrations to reset (space delimited)")]
             List<IssueId> issueIds)
         {
             issueIds.EnumerateOperation(issueIds.Count, "Reset Migration", issueId =>
@@ -66,17 +66,25 @@ namespace Jira2AzureDevOps.Console.Azure
             });
         }
 
-        [Command(Description = "Imports the issues for the given Jira project(s) to Azure DevOps")]
-        public void ImportAll(ProjectFilter projectFilter, ImportOptions importOptions)
+        [Command(Description = "Imports the issues for the given Jira project(s) to Azure DevOps",
+            ExtendedHelpText = "Import includes comments & attachments for each issue. " +
+                               "Only the first page of comments are currently imported, appended to the end of the description.")]
+        public void IssuesByProject(
+            ImportOptions importOptions,
+            ProjectFilter projectFilter,
+            [Option(Description = "Resumes import after this issue")]
+            IssueId resumeAfter)
         {
-            var allMigrations = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount)
+            var allMigrations = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter)
                 .Select(_migrationMetaDataService.Get);
 
             ImportMigrations(importOptions, totalCount, allMigrations);
         }
 
-        [Command(Description = "Imports the given issue(s) to Azure DevOps")]
-        public void ImportById(
+        [Command(Description = "Imports the given issue(s) to Azure DevOps.",
+            ExtendedHelpText = "Import includes comments & attachments for each issue. " +
+                               "Only the first page of comments are currently imported, appended to the end of the description.")]
+        public void IssuesById(
             ImportOptions importOptions,
             [Operand(Description = "The Jira issue id(s) to import (space delimited).  Alternatively, specify a @fail-file-path to import issues that failed in a previous import.")]
             List<IssueId> issueIds)

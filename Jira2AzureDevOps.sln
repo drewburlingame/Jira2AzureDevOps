@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jira2AzureDevOps", "Jira2Az
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{EE37303F-68A2-483C-9F35-264600B9A365}"
 	ProjectSection(SolutionItems) = preProject
+		commands.md = commands.md
 		development.md = development.md
 		README.md = README.md
 		workItemFieldList.csv = workItemFieldList.csv

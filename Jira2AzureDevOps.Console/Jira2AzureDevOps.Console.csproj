@@ -297,7 +297,6 @@
     <Compile Include="Framework\SetDefaultsFromConfigMiddleware.cs" />
     <Compile Include="Azure\ImportOptions.cs" />
     <Compile Include="Jira\JiraApiSettings.cs" />
-    <Compile Include="Jira\JiraApp.cs" />
     <Compile Include="Jira\JiraExportCommands.cs" />
     <Compile Include="Jira\JiraReportCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

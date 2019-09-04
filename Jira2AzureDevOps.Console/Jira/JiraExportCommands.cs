@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Jira
 {
-    [Command(Name = "export", Description = "Commands to export issues and metadata")]
+    [Command(Name = "export", Description = "Commands to export issues and metadata. Options listed are for all export subcommands.")]
     public class JiraExportCommands
     {
         private readonly IConsole _console;
@@ -86,8 +86,8 @@ namespace Jira2AzureDevOps.Console.Jira
             issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, ExportIssue);
         }
 
-        [Command(Description = "Exports issues for the given project(s)",
-            ExtendedHelpText = "Export included history, comments & attachments for each issue. " +
+        [Command(Description = "Exports issues for the given project(s).",
+            ExtendedHelpText = "Export includes history, comments & attachments for each issue. " +
                                "Only the first page of history and comments are currently exported.")]
         public void IssuesByProject(
             ExportOptions exportOptions,

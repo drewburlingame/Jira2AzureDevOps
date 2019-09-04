@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Jira
 {
-    [Command(Name = "report", Description = "Commands to summarize Jira data to aid in creating mapping files")]
+    [Command(Name = "report", Description = "Commands to summarize Jira data to aid in creating mapping files. Options listed are for all report subcommands.")]
     public class JiraReportCommands
     {
         private readonly IConsole _console;

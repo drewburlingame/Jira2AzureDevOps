@@ -45,7 +45,7 @@ Debugging console apps can be a hassle. Changing the arguments in the project pr
 [CommandDotNet](https://github.com/bilal-fazlani/commanddotnet) includes a useful feature for debugging called a [Debug Directive](https://github.com/dotnet/command-line-api/wiki/Features-overview#debugging) initially created by the System.CommandLine project.
 By specifying `[debug]` as the first argument, you'll be prompted to attach a debugger to the current process.
 
-> $ jira2ado [debug] jira export issues-by-id
+> $ jira2ado [debug] export issues-by-id
 > 
 > Attach your debugger to process 18640 (dotnet).
 
