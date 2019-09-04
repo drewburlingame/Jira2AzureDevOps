@@ -40,7 +40,8 @@ namespace Jira2AzureDevOps.Console.Jira
             return next(commandContext);
         }
 
-        [Command(Description = "exports a subset of Jira metadata")]
+        [Command(Description = "exports a subset of Jira metadata",
+            ExtendedHelpText = "Exports projects, labels, issue fields, issue link types, issue priorities, issue resolutions, issue types")]
         public void Metadata()
         {
             if (_jiraApiSettings.JiraOffline)
@@ -74,13 +75,17 @@ namespace Jira2AzureDevOps.Console.Jira
             _jiraApi.GetStatusesByProject().Wait();
         }
 
-        [Command(Description = "Exports issues for the given id(s)")]
+        [Command(Description = "Exports issues for the given id(s)",
+            ExtendedHelpText = "Export included history, comments & attachments for each issue. " +
+                               "Only the first page of history and comments are currently exported.")]
         public void IssuesById(ExportOptions exportOptions, List<IssueId> issueIds)
         {
             issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, ExportIssue);
         }
 
-        [Command(Description = "Exports issues for the given project(s)")]
+        [Command(Description = "Exports issues for the given project(s)",
+            ExtendedHelpText = "Export included history, comments & attachments for each issue. " +
+                               "Only the first page of history and comments are currently exported.")]
         public void IssuesByProject(
             ExportOptions exportOptions,
             ProjectFilter projectFilter,
@@ -91,9 +96,13 @@ namespace Jira2AzureDevOps.Console.Jira
                                   "Use Cache for speed when you only need to updates.")]
             IssueSource? issueListSource = null)
         {
-            if (_jiraApiSettings.JiraOffline && issueListSource.HasValue && issueListSource.Value.HasFlag(IssueSource.Jira))
+            if (_jiraApiSettings.JiraOffline
+                && issueListSource.HasValue
+                && issueListSource.Value.HasFlag(IssueSource.Jira))
             {
-                throw new ArgumentException($"--{nameof(issueListSource)} cannot include {nameof(IssueSource.Jira)} when --{nameof(_jiraApiSettings.JiraOffline)} is specified.");
+                throw new ArgumentException(
+                    $"--{nameof(issueListSource)} cannot include {nameof(IssueSource.Jira)} " +
+                    $"when --{nameof(_jiraApiSettings.JiraOffline)} is specified.");
             }
 
             if (!_jiraApiSettings.JiraOffline)

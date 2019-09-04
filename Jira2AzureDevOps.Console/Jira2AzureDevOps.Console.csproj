@@ -279,6 +279,8 @@
   <ItemGroup>
     <Compile Include="Azure\AdoApiSettings.cs" />
     <Compile Include="App.cs" />
+    <Compile Include="Framework\AllCommandsMarkDownHelpProvider.cs" />
+    <Compile Include="Framework\CommandExtensions.cs" />
     <Compile Include="Jira\ExportOptions.cs" />
     <Compile Include="Jira\JiraApiExtensions.cs" />
     <Compile Include="Jira\ProjectFilter.cs" />

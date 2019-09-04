@@ -14,6 +14,18 @@ namespace Jira2AzureDevOps
 
         static void Main(string[] args)
         {
+            if (args.Length == 1 && args[0] == "generate-docs")
+            {
+                new AppRunner<App>(new AppSettings
+                    {
+                        Case = Case.KebabCase
+                    })
+                    .Configure(c => c.CustomHelpProvider = new AllCommandsMarkDownHelpProvider(true, true))
+                    .Run("-h");
+                return;
+            }
+
+
             DemystifyExceptionLayoutRenderer.Register();
 
             System.Console.CancelKeyPress += Console_CancelKeyPress;

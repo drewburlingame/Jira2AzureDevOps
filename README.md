@@ -6,7 +6,7 @@
 * Provide idempotent replay of both import and export
 * Tools to simplify mapping status & issue types
 * Tools for quick troubleshooting and resolution of errors (see [development](development.md))
-* 
+
 ## Prerequisites
 
 * Jira account w/ API token
@@ -15,21 +15,9 @@
 
 ## Features
 
-#### Export from Jira
+see the list of commands [here](commands.md)
 
-* Issues
-  * History
-  * Comment
-  * Attachments
-* Organizational metadata
-  * Projects
-  * Issue Fields
-  * Issue Link Types
-  * Priorities
-  * Issue Resolutions
-  * Issue Types
-  * Labels
-  * Statuses
+#### Export from Jira
 
 Exported data is cached to the working directory _(see more below)_ which can be archived. 
 If in a month it's discovered other fields need to be imported or additional issues need to be imported, the code or mapping files can be modified and the process can be run again.  
@@ -38,6 +26,10 @@ You don't have to "get it right" the first time. This iterative import makes it 
 #### Import to Azure DevOps
 
 Import Work Items. An export does not have to be completed first. When an Import queries directly from Jira, an export occurs as a by-product of the caching.
+
+TODO: 
+* describe mapping files
+* walkthrough.md to walkthrough a migration
 
 ## Configuration options
 
@@ -64,22 +56,6 @@ The console app recognizes the `@` and then expands the rsp file, putting the ar
 To see how this works, you can use the [CommandDotNet](https://github.com/bilal-fazlani/commanddotnet) Parse directive to see how the rsp file is converted.  Simply include `[parse]` as the first argument to the exe (before any commands)
 
 `Jira2AzureDevOps.exe [parse] jira export issues-by-id @issueids.rsp`
-
-## Commands
-
-* `azure`
-  * `import-all` imports all issues for the given Jira project(s)
-  * `import-by-id` imports the given issue(s)
-  * `reset-import-status` resets the import status for the given issue(s)
-* `jira`
-  * `export`
-    * `issues-by-id` export the given issue(s) by id
-    * `issues-by-project` export all issues for the given project(s)
-    * `metadata` export organization level metadata
-  * `report`
-    * `exported-projects` prints all exports projects keys with a count of issues per project
-    * `stub-issue-types-mapping` generates mapping records in csv format
-    * `stub-status-mapping` generates mapping records in csv format
 	
 ## List of WorkItem fields
 
