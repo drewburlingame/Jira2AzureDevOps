@@ -98,8 +98,10 @@ namespace Jira2AzureDevOps.Console.Jira
             [Option(Description = "Resumes export after this issue")]
             IssueId resumeAfter,
             [Option(Description = "Specify if the issue list should come from Jira, Cache or Both. " +
-                                  "Use Jira when there are unknown updates. " +
-                                  "Use Cache for speed when you only need to updates.")]
+                                  "Use Jira when there are unknown updates or issues have been exported out of order by id. " +
+                                  "Use Cache for speed when you only need to updates. " +
+                                  "Using Both starts with Cache and then queries Jira for issue keys " +
+                                  "greater than what have been cached per project.")]
             IssueSource? issueListSource = null)
         {
             if (_jiraApiSettings.JiraOffline

@@ -98,7 +98,7 @@ Exports issues for the given project(s).
 |Name|Type|List|Default|Allowed|Description|
 |---|---|---|---|---|---|
 |--fail-file|fileName||||The ids of all issues that fail to export will be written to this file which can be used as @response-file input for the export commands|
-|--issue-list-source|IssueSource|||Jira,Cache,Both|Specify if the issue list should come from Jira, Cache or Both. Use Jira when there are unknown updates. Use Cache for speed when you only need to updates.|
+|--issue-list-source|IssueSource|||Jira,Cache,Both|Specify if the issue list should come from Jira, Cache or Both. Use Jira when there are unknown updates or issues have been exported out of order by id. Use Cache for speed when you only need to updates. Using Both starts with Cache and then queries Jira for issue keys greater than what have been cached per project.|
 |-P, --projects|Text|true|||If provided, the operation is applied to only these projects|
 |--resume-after|key||||Resumes export after this issue|
 |-W, --workspace|Text||\{current-dir\}\\jira-cache||Where Jira exports are stored|

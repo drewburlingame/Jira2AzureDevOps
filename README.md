@@ -9,6 +9,7 @@
 
 ## Prerequisites
 
+* Windows machine to run this executable. (TFS SDK requires .Net Framework... le sigh)
 * Jira account w/ API token
 * Azure DevOps account w/ API token
 * Existing Azure DevOps project configured with target work item types and states.

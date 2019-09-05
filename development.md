@@ -70,7 +70,7 @@ enabled by [ReproHeadersMiddleware](Jira2AzureDevOps.Console/Framework/ReproHead
 
 #### IArgumentModel validation
 
-[Argument models](https://bilal-fazlani.github.io/commanddotnet/argument-models/) allows defining arguments in classes for reuse. 
+[Argument models](https://bilal-fazlani.github.io/commanddotnet/argument-models/) allow defining arguments as properties in a class for reuse. 
 Implement `ISelfValidatingArgumentModel` to provide validation errors for the model.
 
 enabled by [SelfValidatingArgumentsMiddleware](Jira2AzureDevOps.Console/Framework/SelfValidatingArgumentsMiddleware.cs)
