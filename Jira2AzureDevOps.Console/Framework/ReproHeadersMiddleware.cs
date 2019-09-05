@@ -93,18 +93,21 @@ namespace Jira2AzureDevOps.Console.Framework
 
             var sb = new StringBuilder(Environment.NewLine);
 
-            var entries = GetOtherConfigInfo(commandContext, config).ToList();
-
             sb.AppendLine("***************************************");
             sb.AppendLine($" Command: {targetCommand.GetParentCommands(true).Reverse().Skip(1).Select(c => c.Name).ToCsv(" ")}");
             sb.LogArguments("Arguments", targetCommand.Operands, config, parseResult);
-            sb.LogArguments("Options", targetCommand.Options.Where(o => !o.IsSystemOption), config, parseResult);
+            sb.LogArguments("Options", IncludeInherited(targetCommand, c => c.Options).Where(o => !o.IsSystemOption), config, parseResult);
 
-            if (!entries.IsNullOrEmpty())
+            sb.AppendLine();
+            sb.AppendLine(" Original input:");
+            sb.AppendLine($"   {commandContext.Original.Args.ToCsv(" ")}");
+
+            var otherConfigEntries = GetOtherConfigInfo(commandContext, config).ToList();
+            if (!otherConfigEntries.IsNullOrEmpty())
             {
                 sb.AppendLine();
-                var maxName = entries.Max(e => e.name.Length);
-                foreach (var entry in entries)
+                var maxName = otherConfigEntries.Max(e => e.name.Length);
+                foreach (var entry in otherConfigEntries)
                 {
                     sb.AppendFormat($"  {{0, -{maxName + 1}}} = {{1}}", entry.name, entry.text);
                     sb.AppendLine();
@@ -155,6 +158,16 @@ namespace Jira2AzureDevOps.Console.Framework
                     yield return header;
                 }
             }
+        }
+
+        private static IEnumerable<T> IncludeInherited<T>(Command c, Func<Command, IEnumerable<T>> getArgs) where T : IArgument
+        {
+            var args = getArgs(c);
+            if (c.Parent != null)
+            {
+                args = args.Union(getArgs(c.Parent));
+            }
+            return args;
         }
 
         private static void LogArguments(this StringBuilder sb,

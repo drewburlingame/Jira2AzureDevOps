@@ -63,8 +63,36 @@ Console logging is enabled by default at INFO level and above.  Commands who's o
 
 enabled by [DisableConsoleLoggingMiddleware](Jira2AzureDevOps.Console/Framework/DisableConsoleLoggingMiddleware.cs)
 
-Also by default, when a command is run, Repro Headers (arguments and other system information) are included at the start of the run.  These can be disabled for a command with the `NoReproHeadersAttribute`.  
-Tip: Repro headers are not logged to console when `DisableConsoleLoggingAttribute` but will still output to the log file.
+When a command is run, Repro Headers (arguments and other system information) are included at the start of the run.  These can be disabled for a command with the `NoReproHeadersAttribute`.  
+
+``` cmd
+[I][09:20:22]
+***************************************
+ Command: export issues-by-project
+  Options:
+    projects           = APP
+    issue-list-source  = Cache
+    workspace          = C:\jira2ado\jira-cache (default)
+    jira-username      = me@jira (default)
+    jira-token         = ***** (default)
+    jira-url           = https://company_slug.atlassian.net (default)
+    jira-batch-size    = 100 (default)
+
+ Original input:
+   export issues-by-project -P APP --issue-list-source Cache
+
+  Tool version  = Jira2AzureDevOps.exe 1.0.0.0
+  .Net version  = .NET Framework 4.8.3815.0
+  OS version    = Microsoft Windows 10.0.18362
+  Machine       = my-laptop
+  Username      = my-laptop\me
+***************************************
+```
+`(default)` indicates the value wasn't provided in the command line, as can be seen from the Original input section.
+I've found this incredibly helpful when trying to repro a bug or simply confirm what I've already done. 
+The Solidify team had a version of this as well and I've included the environment data they added.
+
+Tip: Repro headers are not logged to console when a command is decorated with `DisableConsoleLoggingAttribute`.  The headers will still output to the log file, so this is generally preferred over `NoReproHeadersAttribute`
 
 enabled by [ReproHeadersMiddleware](Jira2AzureDevOps.Console/Framework/ReproHeadersMiddleware.cs)
 
