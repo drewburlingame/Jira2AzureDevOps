@@ -285,7 +285,7 @@
     <Compile Include="Jira\JiraApiExtensions.cs" />
     <Compile Include="Jira\ProjectFilter.cs" />
     <Compile Include="Azure\AzureImportCommands.cs" />
-    <Compile Include="Framework\Cancellation.cs" />
+    <Compile Include="Framework\CancellationHandler.cs" />
     <Compile Include="Framework\ConsoleEnumerator.cs" />
     <Compile Include="Framework\DisableConsoleLoggingAttribute.cs" />
     <Compile Include="Framework\DisableConsoleLoggingMiddleware.cs" />

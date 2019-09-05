@@ -7,6 +7,7 @@ using Jira2AzureDevOps.Logic.Migrations;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Jira
@@ -15,6 +16,7 @@ namespace Jira2AzureDevOps.Console.Jira
     public class JiraExportCommands
     {
         private readonly IConsole _console;
+        private readonly CancellationToken _cancellationToken;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private JiraContext _jiraContext;
@@ -23,9 +25,10 @@ namespace Jira2AzureDevOps.Console.Jira
         private IJiraApiSettings _jiraApiSettings;
         private MigrationMetaDataService _migrationMetaDataService;
 
-        public JiraExportCommands(IConsole console)
+        public JiraExportCommands(IConsole console, CancellationToken cancellationToken)
         {
             _console = console;
+            _cancellationToken = cancellationToken;
         }
 
         public Task<int> Interceptor(
@@ -83,7 +86,7 @@ namespace Jira2AzureDevOps.Console.Jira
             [Operand(Description = "The Jira issue id(s) to export (space delimited).  Alternatively, specify a @fail-file-path to export issues that failed in a previous export.")]
             List<IssueId> issueIds)
         {
-            issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, ExportIssue);
+            issueIds.EnumerateOperation(issueIds.Count, "Export Issue", exportOptions.FailFile, _cancellationToken, ExportIssue);
         }
 
         [Command(Description = "Exports issues for the given project(s).",
@@ -114,7 +117,7 @@ namespace Jira2AzureDevOps.Console.Jira
             }
 
             var issueIds = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter);
-            issueIds.EnumerateOperation(totalCount, "Export Issue", exportOptions.FailFile, ExportIssue);
+            issueIds.EnumerateOperation(totalCount, "Export Issue", exportOptions.FailFile, _cancellationToken, ExportIssue);
         }
 
         private void ExportIssue(IssueId issueId)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Jira2AzureDevOps.Logic.Framework;
 
 namespace Jira2AzureDevOps.Console.Framework
@@ -15,27 +16,30 @@ namespace Jira2AzureDevOps.Console.Framework
         internal static void EnumerateOperation<T>(this IEnumerable<T> items, 
             int totalCount, 
             string operationName,
+            CancellationToken cancellationToken,
             Action<T> action)
         {
-            items.EnumerateOperation(new State(totalCount), operationName, null, null, action);
+            items.EnumerateOperation(new State(totalCount), operationName, null, null, cancellationToken, action);
         }
 
         internal static void EnumerateOperation<T>(this IEnumerable<T> items,
             int totalCount,
             string operationName,
             Func<T, object> getId,
+            CancellationToken cancellationToken,
             Action<T> action)
         {
-            items.EnumerateOperation(new State(totalCount), operationName, getId, null, action);
+            items.EnumerateOperation(new State(totalCount), operationName, getId, null, cancellationToken, action);
         }
 
         internal static void EnumerateOperation<T>(this IEnumerable<T> items,
             int totalCount,
             string operationName,
             FileInfo failFile,
+            CancellationToken cancellationToken,
             Action<T> action)
         {
-            items.EnumerateOperation(new State(totalCount), operationName, null, failFile, action);
+            items.EnumerateOperation(new State(totalCount), operationName, null, failFile, cancellationToken, action);
         }
 
         internal static void EnumerateOperation<T>(this IEnumerable<T> items, 
@@ -43,6 +47,7 @@ namespace Jira2AzureDevOps.Console.Framework
             string operationName,
             Func<T, object> getId,
             FileInfo failFile,
+            CancellationToken cancellationToken,
             Action<T> action)
         {
             getId = getId ?? (item => item);
@@ -52,7 +57,7 @@ namespace Jira2AzureDevOps.Console.Framework
 
             Logger.Info("begin {operationName} for {count} items", operationName, state.TotalCount);
 
-            foreach (var item in items.TakeWhile(i => !state.ShouldQuit && Cancellation.IsNotRequested))
+            foreach (var item in items.TakeWhile(i => !state.ShouldQuit && !cancellationToken.IsCancellationRequested))
             {
                 var id = getId(item);
                 try

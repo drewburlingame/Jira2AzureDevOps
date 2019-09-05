@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Azure
@@ -19,6 +20,7 @@ namespace Jira2AzureDevOps.Console.Azure
     public class AzureImportCommands
     {
         private readonly IConsole _console;
+        private readonly CancellationToken _cancellationToken;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private MigrationRepository _migrationRepository;
@@ -26,9 +28,10 @@ namespace Jira2AzureDevOps.Console.Azure
         private AdoContext _adoContext;
         private MigrationMetaDataService _migrationMetaDataService;
 
-        public AzureImportCommands(IConsole console)
+        public AzureImportCommands(IConsole console, CancellationToken cancellationToken)
         {
             _console = console;
+            _cancellationToken = cancellationToken;
         }
 
         public Task<int> Intercept(
@@ -55,7 +58,7 @@ namespace Jira2AzureDevOps.Console.Azure
             [Operand(Description = "The Jira issue id(s) of the migrations to reset (space delimited)")]
             List<IssueId> issueIds)
         {
-            issueIds.EnumerateOperation(issueIds.Count, "Reset Migration", issueId =>
+            issueIds.EnumerateOperation(issueIds.Count, "Reset Migration", _cancellationToken, issueId =>
             {
                 var migration = _migrationRepository.Get(issueId);
                 if (deleteFromAzure)
@@ -169,6 +172,7 @@ namespace Jira2AzureDevOps.Console.Azure
                 "Import Issue",
                 migration => migration.IssueId,
                 failFile,
+                _cancellationToken,
                 migration =>
                 {
 
