@@ -79,11 +79,20 @@ namespace Jira2AzureDevOps.Console.Framework
                     {
                         if (etaCalculator.TryGetEta(out var etr, out var eta))
                         {
-                            Logger.Info(new { state, elapsed = totalTime.Elapsed, etr, eta });
+                            Logger.Info(new
+                            {
+                                state = new {state.TotalCount, state.Processed, state.Succeeded, state.Errored},
+                                elapsed = totalTime.Elapsed,
+                                etr, eta
+                            });
                         }
                         else
                         {
-                            Logger.Info(new { state, elapsed = totalTime.Elapsed });
+                            Logger.Info(new
+                            {
+                                state = new {state.TotalCount, state.Processed, state.Succeeded, state.Errored},
+                                elapsed = totalTime.Elapsed
+                            });
                         }
                     }
                 }
@@ -96,7 +105,13 @@ namespace Jira2AzureDevOps.Console.Framework
             {
                 failFile = null;
             }
-            Logger.Info(new { state, elapsed = totalTime.Elapsed, failFile });
+
+            Logger.Info(new
+            {
+                state = new {state.TotalCount, state.Processed, state.Succeeded, state.Errored},
+                elapsed = totalTime.Elapsed,
+                failFile
+            });
         }
 
         internal class State
