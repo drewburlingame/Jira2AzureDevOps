@@ -74,10 +74,12 @@ namespace Jira2AzureDevOps.Console.Azure
                                "Only the first page of comments are currently imported, appended to the end of the description.")]
         public void IssuesByProject(
             ImportOptions importOptions,
-            ProjectFilter projectFilter,
             [Option(Description = "Resumes import after this issue")]
-            IssueId resumeAfter)
+            IssueId resumeAfter,
+            [Operand(Description = "The keys of the projects to import. If none are specified, all projects are imported")]
+            List<string> projects)
         {
+            var projectFilter = new ProjectFilter{Projects = projects};
             var allMigrations = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter)
                 .Select(_migrationMetaDataService.Get);
 

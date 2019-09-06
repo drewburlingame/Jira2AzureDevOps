@@ -94,7 +94,6 @@ namespace Jira2AzureDevOps.Console.Jira
                                "Only the first page of history and comments are currently exported.")]
         public void IssuesByProject(
             ExportOptions exportOptions,
-            ProjectFilter projectFilter,
             [Option(Description = "Resumes export after this issue")]
             IssueId resumeAfter,
             [Option(Description = "Specify if the issue list should come from Jira, Cache or Both. " +
@@ -102,7 +101,9 @@ namespace Jira2AzureDevOps.Console.Jira
                                   "Use Cache for speed when you only need to updates. " +
                                   "Using Both starts with Cache and then queries Jira for issue keys " +
                                   "greater than what have been cached per project.")]
-            IssueSource? issueListSource = null)
+            IssueSource? issueListSource = null,
+            [Operand(Description = "The keys of the projects to export. If none are specified, all projects are exported")]
+            List<string> projects = null)
         {
             if (_jiraApiSettings.JiraOffline
                 && issueListSource.HasValue
@@ -118,6 +119,7 @@ namespace Jira2AzureDevOps.Console.Jira
                 ((CacheJiraApi)_jiraApi).IssueListSource = issueListSource.GetValueOrDefault(IssueSource.Both);
             }
 
+            var projectFilter = new ProjectFilter{Projects = projects};
             var issueIds = _jiraContext.Api.GetIssueIds(projectFilter, out int totalCount, resumeAfter);
             issueIds.EnumerateOperation(totalCount, "Export Issue", exportOptions.FailFile, _cancellationToken, ExportIssue);
         }
