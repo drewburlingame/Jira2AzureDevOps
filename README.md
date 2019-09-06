@@ -14,6 +14,10 @@
 * Azure DevOps account w/ API token
 * Existing Azure DevOps project configured with target work item types and states.
 
+## Walk through
+
+follow the [walkthrough](walkthrough.md) here to import Jira issues into Azure DevOps 
+
 ## Features
 
 see the list of commands [here](commands.md).  Defaults for command options can be overridden with the `Options.config` file as described in [Setting credentials](#Setting-credentials) below.
