@@ -13,7 +13,7 @@ namespace Jira2AzureDevOps.Console.Framework
             return appRunner.Configure(c => c.UseMiddleware(DisableConsoleLogging, MiddlewareStages.PostBindValuesPreInvoke));
         }
 
-        private static Task<int> DisableConsoleLogging(CommandContext context, Func<CommandContext, Task<int>> next)
+        private static Task<int> DisableConsoleLogging(CommandContext context, ExecutionDelegate next)
         {
             if (context.ParseResult.TargetCommand.CustomAttributes.IsDefined(typeof(DisableConsoleLoggingAttribute),
                 false))

@@ -60,7 +60,7 @@ namespace Jira2AzureDevOps.Console.Framework
             var path = command.GetPath();
 
             var subcommands = command.Subcommands.OrderBy(c => c.Name).ToList();
-            var options = command.Options.OrderBy(o => o.Name).Where(o => !o.IsSystemOption).ToList();
+            var options = command.Options.OrderBy(o => o.Name).Where(o => o.ShowInHelp).ToList();
             var operands = command.Operands.OrderBy(o => o.Name).ToList();
 
             var subCommandsUsage = subcommands.Any() ? " [commands]" : "";

@@ -220,10 +220,10 @@ namespace Jira2AzureDevOps.Logic.Jira.JiraApi
             file.WriteAllText(projects.ToString());
         }
 
-        private static async Task<T> LoadJsonFromFile<T>(FileInfo file) where T : JToken
+        private static Task<T> LoadJsonFromFile<T>(FileInfo file) where T : JToken
         {
             var json = LoadTextFromFile(file);
-            return json == null ? null : (T)JToken.Parse(json);
+            return Task.FromResult(json == null ? null : (T)JToken.Parse(json));
         }
 
         private static string LoadTextFromFile(FileInfo file)
@@ -237,7 +237,7 @@ namespace Jira2AzureDevOps.Logic.Jira.JiraApi
             return file.ReadAllText();
         }
 
-        private static async Task<string[]> LoadLinesFromFile(FileInfo file)
+        private static Task<string[]> LoadLinesFromFile(FileInfo file)
         {
             if (!file.Exists)
             {
@@ -245,7 +245,7 @@ namespace Jira2AzureDevOps.Logic.Jira.JiraApi
                 return null;
             }
 
-            return file.ReadAllLines();
+            return Task.FromResult(file.ReadAllLines());
         }
 
         private static ConcurrentDictionary<string, HashSet<IssueId>> LoadedIssuesByProject(LocalDirs localDirs)

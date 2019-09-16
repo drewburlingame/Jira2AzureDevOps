@@ -28,7 +28,7 @@ namespace Jira2AzureDevOps.Console.Framework
             });
         }
 
-        private static Task<int> SetDefaultsFromAppSettings(CommandContext context, Func<CommandContext, Task<int>> next)
+        private static Task<int> SetDefaultsFromAppSettings(CommandContext context, ExecutionDelegate next)
         {
             if (context.ParseResult.ParseError != null)
             {

@@ -32,15 +32,15 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         public Task<int> Interceptor(
-            CommandContext commandContext, Func<CommandContext, Task<int>> next,
+            InterceptorExecutionDelegate next,
             JiraApiSettings jiraApiSettings, WorkspaceSettings workspaceSettings)
         {
-            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, commandContext.AppConfig.CancellationToken);
+            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, _cancellationToken);
             _jiraApi = _jiraContext.Api;
             _jiraApiSettings = _jiraContext.ApiSettings;
             _migrationMetaDataService = new MigrationMetaDataService(_jiraContext);
 
-            return next(commandContext);
+            return next();
         }
 
         [Command(Description = "exports a subset of Jira metadata",

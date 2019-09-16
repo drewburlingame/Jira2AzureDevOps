@@ -4,7 +4,6 @@ using Jira2AzureDevOps.Logic.Framework;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Task = System.Threading.Tasks.Task;
 
 namespace Jira2AzureDevOps.Console.Framework
 {
@@ -15,11 +14,10 @@ namespace Jira2AzureDevOps.Console.Framework
             return appRunner.Configure(c => c.UseMiddleware(ValidateModels, MiddlewareStages.PostBindValuesPreInvoke));
         }
 
-        private static Task<int> ValidateModels(CommandContext context, Func<CommandContext, Task<int>> next)
+        private static Task<int> ValidateModels(CommandContext context, ExecutionDelegate next)
         {
-            var commandParams = context.InvocationContext.CommandInvocation.ParameterValues;
-            var interceptorParams = context.InvocationContext.InterceptorInvocation.ParameterValues;
-            var errors = commandParams.Union(interceptorParams ?? Enumerable.Empty<object>())
+            var paramValues = context.InvocationContexts.All.SelectMany(ic => ic.Invocation.ParameterValues);
+            var errors = paramValues
                 .OfType<ISelfValidatingArgumentModel>()
                 .SelectMany(m => m.GetValidationErrors())
                 .ToCsv(Environment.NewLine);

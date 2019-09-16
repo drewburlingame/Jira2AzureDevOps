@@ -35,20 +35,20 @@ namespace Jira2AzureDevOps.Console.Azure
         }
 
         public Task<int> Intercept(
-            CommandContext commandContext, Func<CommandContext, Task<int>> next,
+            InterceptorExecutionDelegate next,
             AdoApiSettings adoApiSettings, WorkspaceSettings workspaceSettings, JiraApiSettings jiraApiSettings)
         {
-            _adoContext = new AdoContext(adoApiSettings, commandContext.AppConfig.CancellationToken);
+            _adoContext = new AdoContext(adoApiSettings, _cancellationToken);
             if (!_adoContext.TryConnect())
             {
                 _console.Out.WriteLine("Unable to connect to TFS");
                 return Task.FromResult(1);
             }
-            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, commandContext.AppConfig.CancellationToken);
+            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, _cancellationToken);
             _migrationRepository = new MigrationRepository(_jiraContext.LocalDirs);
             _migrationMetaDataService = new MigrationMetaDataService(_jiraContext);
 
-            return next(commandContext);
+            return next();
         }
 
         [Command(Description = "Resets the import status for the given issue(s)")]

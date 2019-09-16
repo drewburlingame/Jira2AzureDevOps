@@ -5,9 +5,9 @@ using Jira2AzureDevOps.Logic;
 using Jira2AzureDevOps.Logic.Jira;
 using Jira2AzureDevOps.Logic.Jira.Model;
 using Jira2AzureDevOps.Logic.Migrations;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jira2AzureDevOps.Console.Jira
@@ -26,12 +26,12 @@ namespace Jira2AzureDevOps.Console.Jira
         }
 
         public Task<int> Interceptor(
-            CommandContext commandContext, Func<CommandContext, Task<int>> next,
+            InterceptorExecutionDelegate next, CancellationToken cancellationToken,
             JiraApiSettings jiraApiSettings, WorkspaceSettings workspaceSettings)
         {
-            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, commandContext.AppConfig.CancellationToken);
+            _jiraContext = new JiraContext(jiraApiSettings, workspaceSettings, cancellationToken);
             _migrationRepository = new MigrationRepository(_jiraContext.LocalDirs);
-            return next(commandContext);
+            return next();
         }
 
         [DisableConsoleLogging]

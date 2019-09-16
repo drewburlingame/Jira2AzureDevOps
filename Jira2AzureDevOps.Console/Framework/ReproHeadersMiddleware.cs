@@ -73,7 +73,7 @@ namespace Jira2AzureDevOps.Console.Framework
             }
         }
 
-        private static Task<int> LogHeader(CommandContext commandContext, Func<CommandContext, Task<int>> next)
+        private static Task<int> LogHeader(CommandContext commandContext, ExecutionDelegate next)
         {
             var config = commandContext.AppConfig.Services.Get<LogHeaderConfig>();
             if (config.SkipCommand?.Invoke(commandContext) ?? false)
@@ -96,7 +96,7 @@ namespace Jira2AzureDevOps.Console.Framework
             sb.AppendLine("***************************************");
             sb.AppendLine($" Command: {targetCommand.GetParentCommands(true).Reverse().Skip(1).Select(c => c.Name).ToCsv(" ")}");
             sb.LogArguments("Arguments", targetCommand.Operands, config, parseResult);
-            sb.LogArguments("Options", IncludeInherited(targetCommand, c => c.Options).Where(o => !o.IsSystemOption), config, parseResult);
+            sb.LogArguments("Options", IncludeInherited(targetCommand, c => c.Options).Where(o => !o.IsMiddlewareOption), config, parseResult);
 
             sb.AppendLine();
             sb.AppendLine(" Original input:");
